@@ -26,7 +26,10 @@ export const BUILDINGS = {
   fort: { name: 'Крепость', icon: '♜', cost: 5, yield: 'defence', text: '+2 к обороне области' }
 };
 
+export const SAVE_VERSION = 2;
+
 export const createGame = () => ({
+  version: SAVE_VERSION,
   turn: 1, maxTurns: 16, era: 0, actions: 2, food: 8, science: 3, legacy: 0,
   selected: 'haven', log: ['Народ высадился на Белом берегу. Летопись начата.'], won: null,
   regions: Object.fromEntries(MAP.map((r, i) => [r.id, {
@@ -35,6 +38,12 @@ export const createGame = () => ({
     building: i === 0 ? 'farm' : null
   }]))
 });
+
+export function restoreGame(value) {
+  if (!value || value.version !== SAVE_VERSION || !Number.isInteger(value.turn) || !value.regions) return null;
+  if (!MAP.every(r => value.regions[r.id] && ['player', 'neutral', 'ember', 'azure'].includes(value.regions[r.id].owner))) return null;
+  return value;
+}
 
 export const owned = (state, who = 'player') => MAP.filter(r => state.regions[r.id].owner === who);
 export const region = id => MAP.find(r => r.id === id);
@@ -74,12 +83,16 @@ export function march(state, from, to, amount) {
 
 function aiMove(state, faction) {
   const lands = owned(state, faction); if (!lands.length) return;
+  // Every surviving rival receives a small, visible reinforcement. This keeps the
+  // late campaign contested instead of turning the AI into a finite puzzle.
+  const capital = lands.reduce((best, land) => state.regions[land.id].army > state.regions[best.id].army ? land : best, lands[0]);
+  state.regions[capital.id].army++;
   const options = lands.flatMap(from => neighbours(from.id).map(to => ({ from, to: region(to) }))).filter(x => state.regions[x.to.id].owner !== faction);
   options.sort((a, b) => state.regions[a.to.id].army - state.regions[b.to.id].army);
   const pick = options[0]; if (!pick || state.regions[pick.from.id].army < 2) return;
   const send = state.regions[pick.from.id].army - 1, target = state.regions[pick.to.id]; state.regions[pick.from.id].army = 1;
   if (send > target.army + (target.building === 'fort' ? 2 : 0)) { const wasPlayer = target.owner === 'player'; target.owner = faction; target.army = Math.max(1, send - target.army); target.building = null; state.log.unshift(`${faction === 'ember' ? 'Багряный союз' : 'Лазурный дом'} захватил область «${pick.to.name}».`); if (wasPlayer) state.legacy = Math.max(0, state.legacy - 2); }
-  else target.army = Math.max(1, target.army - 1);
+  else { target.army = Math.max(1, target.army - 1); state.log.unshift(`${faction === 'ember' ? 'Багряный союз' : 'Лазурный дом'} атаковал область «${pick.to.name}», но не смог её взять.`); }
 }
 
 export function endTurn(state) {

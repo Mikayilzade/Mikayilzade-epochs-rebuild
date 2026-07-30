@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createGame, owned, income, recruit, build, march, endTurn, score } from '../src/game.js';
+import { createGame, restoreGame, owned, income, recruit, build, march, endTurn, score } from '../src/game.js';
 
 test('new campaign has two player lands and two actions', () => {
   const state = createGame();
@@ -24,6 +24,12 @@ test('invalid orders leave state untouched', () => {
   assert.equal(build(state, 'crown', 'farm'), state);
 });
 
+test('save validation rejects obsolete and malformed state', () => {
+  assert.equal(restoreGame({ version: 1, turn: 1, regions: {} }), null);
+  assert.equal(restoreGame({ ...createGame(), regions: {} }), null);
+  assert.equal(restoreGame(createGame())?.turn, 1);
+});
+
 test('a superior army captures an adjacent region', () => {
   const state = createGame();
   state.regions.haven.army = 8;
@@ -44,17 +50,20 @@ test('buildings cost food and contribute to income', () => {
 
 test('ending a turn grants income, advances era and runs rivals', () => {
   let state = createGame();
+  const rivalForces = owned(state, 'ember').reduce((sum, r) => sum + state.regions[r.id].army, 0);
   for (let i = 0; i < 4; i++) state = endTurn(state);
   assert.equal(state.turn, 5);
   assert.equal(state.era, 1);
   assert.ok(state.food > 0);
   assert.ok(state.log.length > 1);
+  assert.notEqual(owned(state, 'ember').reduce((sum, r) => sum + state.regions[r.id].army, 0), rivalForces);
 });
 
 test('campaign resolves after sixteen turns and has a score', () => {
   let state = createGame();
   state.legacy = 20;
   for (const id of ['ford','steppe','grove','crown','cliffs']) state.regions[id].owner = 'player';
+  owned(state).forEach(r => { state.regions[r.id].army = 99; });
   while (state.won === null) state = endTurn(state);
   assert.equal(state.won, true);
   assert.ok(score(state) >= 100);

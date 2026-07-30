@@ -1,12 +1,17 @@
-import { MAP, ERAS, BUILDINGS, createGame, owned, income, recruit, build, march, endTurn, score } from './game.js';
+import { MAP, ERAS, BUILDINGS, createGame, restoreGame, owned, income, recruit, build, march, endTurn, score } from './game.js';
 
 const app = document.querySelector('#app');
 let state;
-const save = () => localStorage.setItem('epochs-map-save', JSON.stringify(state));
+const SAVE_KEY = 'epochs-map-save';
+const save = () => localStorage.setItem(SAVE_KEY, JSON.stringify(state));
 const esc = text => String(text).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 
 function boot(resume = false) {
-  state = resume && localStorage.getItem('epochs-map-save') ? JSON.parse(localStorage.getItem('epochs-map-save')) : createGame();
+  let stored = null;
+  if (resume) {
+    try { stored = restoreGame(JSON.parse(localStorage.getItem(SAVE_KEY))); } catch { localStorage.removeItem(SAVE_KEY); }
+  }
+  state = stored || createGame();
   render();
 }
 
@@ -20,8 +25,8 @@ function panel() {
   const r = MAP.find(x => x.id === state.selected), s = state.regions[r.id], friendly = s.owner === 'player';
   const adjacent = r.links.map(id => MAP.find(x => x.id === id)).filter(Boolean);
   return `<aside class="inspector"><button class="close-panel" aria-label="Закрыть">×</button><div class="terrain ${r.terrain}"></div><p class="kicker">${friendly ? 'ВАША ОБЛАСТЬ' : s.owner === 'neutral' ? 'СВОБОДНАЯ ЗЕМЛЯ' : 'ВЛАДЕНИЕ СОПЕРНИКА'}</p><h2>${r.name}</h2><div class="yield"><span>♟ ${s.army} отрядов</span><span>● +${r.food} пищи</span><span>✦ +${r.science} знания</span></div>${s.building ? `<div class="built">${BUILDINGS[s.building].icon}<b>${BUILDINGS[s.building].name}</b><small>${BUILDINGS[s.building].text}</small></div>` : ''}
-  ${friendly ? `<section><h3>Приказы</h3><button data-recruit ${state.food < 2 ? 'disabled' : ''}>＋ Собрать 2 отряда <small>2 пищи · 1 действие</small></button><div class="build-grid">${Object.entries(BUILDINGS).map(([id,b]) => `<button data-build="${id}" ${s.building || state.food < b.cost ? 'disabled' : ''}>${b.icon} ${b.name}<small>${b.cost} пищи</small></button>`).join('')}</div></section>` : ''}
-  <section><h3>${friendly ? 'Отправить поход' : 'Соседние земли'}</h3>${adjacent.map(n => { const ns=state.regions[n.id]; return `<button class="march" data-target="${n.id}" ${!friendly || s.army < 2 ? 'disabled' : ''}><span>${n.name}<small>${ns.owner === 'player' ? 'союзная' : `${ns.army} защитников`}</small></span>${friendly ? '<b>→</b>' : ''}</button>`; }).join('')}</section></aside>`;
+  ${friendly ? `<section><h3>Приказы</h3><button data-recruit ${state.food < 2 || state.actions < 1 ? 'disabled' : ''}>＋ Собрать 2 отряда <small>2 пищи · 1 действие</small></button><div class="build-grid">${Object.entries(BUILDINGS).map(([id,b]) => `<button data-build="${id}" ${s.building || state.food < b.cost || state.actions < 1 ? 'disabled' : ''}>${b.icon} ${b.name}<small>${b.cost} пищи</small></button>`).join('')}</div></section>` : ''}
+  <section><h3>${friendly ? 'Отправить поход' : 'Соседние земли'}</h3>${adjacent.map(n => { const ns=state.regions[n.id]; return `<button class="march" data-target="${n.id}" ${!friendly || s.army < 2 || state.actions < 1 ? 'disabled' : ''}><span>${n.name}<small>${ns.owner === 'player' ? 'союзная' : `${ns.army} защитников`}</small></span>${friendly ? '<b>→</b>' : ''}</button>`; }).join('')}</section></aside>`;
 }
 
 function render() {
@@ -39,15 +44,24 @@ function bind() {
   document.querySelectorAll('[data-build]').forEach(el => el.onclick = () => { state = build(state, state.selected, el.dataset.build); render(); });
   document.querySelectorAll('[data-target]').forEach(el => el.onclick = () => { state = march(state, state.selected, el.dataset.target, Math.ceil(state.regions[state.selected].army / 2)); state.selected = el.dataset.target; render(); });
   document.querySelector('#end-turn').onclick = () => { state = endTurn(state); render(); };
-  document.querySelector('#menu').onclick = () => { if (confirm('Начать новую летопись? Текущий прогресс будет утрачен.')) boot(false); };
+  document.querySelector('#menu').onclick = openMenu;
+}
+
+function openMenu() {
+  const dialog = document.createElement('dialog');
+  dialog.className = 'game-menu';
+  dialog.innerHTML = `<form method="dialog"><p class="kicker">ЛЕТОПИСЬ СОХРАНЕНА</p><h2>Пауза</h2><p>Вернуться к карте или начать новую кампанию?</p><button value="cancel" autofocus>Продолжить</button><button value="new" class="danger">Начать заново</button></form>`;
+  document.body.append(dialog); dialog.showModal();
+  dialog.addEventListener('close', () => { const reset = dialog.returnValue === 'new'; dialog.remove(); if (reset) { localStorage.removeItem(SAVE_KEY); boot(false); } });
 }
 
 function renderEnd() {
   const victory = state.won;
   app.innerHTML = `<main class="final"><p class="kicker">ЛЕТОПИСЬ ЗАВЕРШЕНА</p><div class="final-sigil">${victory ? '♛' : '◈'}</div><h1>${victory ? 'Держава пережила века' : 'Имя растаяло во времени'}</h1><p>${victory ? 'Вы связали земли, сохранили память и создали цивилизацию, способную встретить новую эпоху.' : 'Народу не удалось исполнить предназначение. Но каждая неудача — ещё одна строка в великой летописи.'}</p><div class="score"><span><b>${owned(state).length}</b> земель</span><span><b>${state.legacy}</b> наследия</span><span><b>${score(state)}</b> итог</span></div><button class="primary" id="again">Начать новую летопись →</button></main>`;
-  document.querySelector('#again').onclick = () => { localStorage.removeItem('epochs-map-save'); boot(false); };
+  document.querySelector('#again').onclick = () => { localStorage.removeItem(SAVE_KEY); boot(false); };
 }
 
-const previous = localStorage.getItem('epochs-map-save');
+let previous = null;
+try { previous = restoreGame(JSON.parse(localStorage.getItem(SAVE_KEY))); } catch { localStorage.removeItem(SAVE_KEY); }
 document.querySelector('#new-game').onclick = () => boot(false);
 if (previous) { const button = document.querySelector('#continue'); button.classList.remove('hidden'); button.onclick = () => boot(true); }
