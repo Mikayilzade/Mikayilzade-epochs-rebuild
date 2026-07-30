@@ -1,0 +1,1 @@
+{"name":"epochs-rebuild","version":"1.0.0","private":true,"type":"module","scripts":{"start":"node scripts/server.js","dev":"node scripts/server.js","test":"node --test","build":"node scripts/build.js"}}
