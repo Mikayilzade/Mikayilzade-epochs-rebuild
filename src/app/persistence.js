@@ -1,4 +1,4 @@
-import { BUILDINGS, TERRAIN, UNIT_TYPES } from "../content/config.js";
+import { BUILDINGS, TECHS, TERRAIN, UNIT_TYPES } from "../content/config.js";
 
 export const SAVE_KEY = "epohi-rebuild-campaign";
 export const SAVE_SCHEMA_VERSION = 1;
@@ -31,9 +31,21 @@ function validateGame(game) {
       integer(settlement.development) && Array.isArray(settlement.buildings) &&
       settlement.buildings.every(building => Object.hasOwn(BUILDINGS, building)) &&
       new Set(settlement.buildings).size === settlement.buildings.length)) return false;
-  if (!Array.isArray(game.research?.completed) ||
-    (game.selectedUnitId !== null && !game.units.some(unit => unit.id === game.selectedUnitId))) return false;
-  return Array.isArray(game.log);
+  const completed = game.research?.completed;
+  if (!Array.isArray(completed) ||
+    completed.some(tech => !Object.hasOwn(TECHS, tech)) ||
+    new Set(completed).size !== completed.length ||
+    completed.some(tech => TECHS[tech].requires && !completed.includes(TECHS[tech].requires))) return false;
+  const active = game.research.active;
+  if (active !== null && (!Object.hasOwn(TECHS, active) || completed.includes(active) ||
+    (TECHS[active].requires && !completed.includes(TECHS[active].requires)))) return false;
+  if (!Number.isFinite(game.research.progress) || game.research.progress < 0 ||
+    (active === null && game.research.progress !== 0) ||
+    (active !== null && game.research.progress >= TECHS[active].cost)) return false;
+  if (game.settlements.some(settlement => settlement.buildings.some(building =>
+    !completed.includes(BUILDINGS[building].requires)))) return false;
+  if (game.selectedUnitId !== null && !game.units.some(unit => unit.id === game.selectedUnitId)) return false;
+  return Array.isArray(game.log) && game.log.every(entry => typeof entry === "string");
 }
 
 export function serialize(state) {

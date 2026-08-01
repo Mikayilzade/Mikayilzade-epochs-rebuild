@@ -10,9 +10,9 @@ Updated: 2026-08-01
 - The First Hearth settlement has population/development and works local terrain for food, production and knowledge. A settler may found a distant second settlement.
 - Agriculture and masonry form a prerequisite research path with visible unlock messages, tribe → settlement → city status, and production-funded Ambar/Quarry construction whose yields affect later turns.
 - End turn resolves yields, population development, research, autonomous deterministic raider movement and consequential raids, movement refresh and fog.
-- Version 1 JSON saves validate the complete map shape, terrain, resources, entity bounds and identifiers before restoration; missing, malformed and unsupported saves fail safely.
+- Version 1 JSON saves validate the complete map shape, terrain, resources, entity bounds, identifiers, research prerequisites/progress and building unlock relationships before restoration; missing, malformed and unsupported saves fail safely.
 - Canvas camera supports mouse/touch pan, two-finger pinch and wheel/buttons zoom, whole-map fit and selected-unit refocus. The panels reflow for phone widths.
-- Ten pure-rule automated tests and the deterministic turn-13 save/reload smoke scenario pass; the smoke path researches Agriculture, spends production on an Ambar, restores it, and observes a raid. Production output is generated in `dist/`.
+- Eleven pure-rule automated tests and the deterministic turn-13 save/reload smoke scenario pass; the smoke path researches Agriculture, spends production on an Ambar, restores it, and observes a raid. Chronicle entries are rendered as text rather than restored HTML. Production output is generated in `dist/`.
 
 ## Verified legacy state
 

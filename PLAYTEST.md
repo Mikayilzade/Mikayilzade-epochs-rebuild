@@ -35,6 +35,6 @@ Status: completed for first production mission
 - Autonomous action: the raider changes position independently, reaches the capital outskirts and steals production in a recorded raid.
 - Release blockers: none found.
 - Moderate finding repaired: economy assertion originally assumed population could not grow during five turns; it now verifies the correct lower bound while a separate simulation rule applies growth.
-- Completed repair: the prior pass added consequential raids, deep structural save validation and pinch zoom; this completion pass replaces the text-only research promise with real production spending, persistent buildings and observable yield bonuses. Ten focused rule tests now pass.
+- Final focused fixes: save restoration now rejects unknown/duplicate/out-of-order research, invalid progress and buildings without their technology; chronicle entries are inserted as text nodes rather than HTML. Eleven focused rule tests now pass.
 - Known limitations accepted: no tactical combat, one AI raider, automatic tile working, instant building completion, one local save slot, and finite research content.
 - Screenshot: unavailable in this container because neither a browser nor an installable browser package was available; this is recorded as an environment limitation rather than a gameplay verification claim.
