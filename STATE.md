@@ -1,13 +1,18 @@
 # Verified Current State
 
-Updated: 2026-07-30
+Updated: 2026-08-01
 
-## Repository state
+## Implemented and locally verified
 
-- This repository is the clean target for a new implementation of `Эпохи`.
-- The previous PR that implemented a linear 12-event narrative game was rejected and closed because it changed the product identity.
-- No product implementation from that PR is canonical.
-- Control files and a local legacy evidence bundle are being established before the next Codex production mission.
+- A new dependency-free browser implementation presents a seeded, generated 16 × 12 tile world as the primary surface.
+- Plains, forests, hills, water and mountains have data-defined yields/passability; some land carries visible resources.
+- Per-tile fog is revealed by persistent scouts and settlers. Orthogonal movement spends role-specific movement points and rejects range, impassable terrain, exhausted movement and enemy occupation.
+- The First Hearth settlement has population/development and works local terrain for food, production and knowledge. A settler may found a distant second settlement.
+- Agriculture and masonry form a prerequisite research path with visible unlock messages, yield effects and tribe → settlement → city status.
+- End turn resolves yields, population development, research, autonomous deterministic raider movement, movement refresh and fog.
+- Version 1 JSON saves validate before restoration; missing, malformed and unsupported saves fail safely.
+- Canvas camera supports mouse/touch pan, wheel/buttons zoom, whole-map fit and selected-unit refocus. The panels reflow for phone widths.
+- Pure-rule automated tests and the deterministic ten-turn save/reload smoke scenario pass; production output is generated in `dist/`.
 
 ## Verified legacy state
 
@@ -28,20 +33,21 @@ Verified legacy sources show:
 
 Exact evidence and source references are in `SOURCE_AUDIT.md` and `reference/LEGACY_SOURCE_EVIDENCE.md`.
 
-## What is ready
+## Tested boundaries
 
-- Product identity is locked in `VISION.md`.
-- The first finite rebuild mission is defined in `MISSION.md`.
-- Release criteria are defined in `QUALITY.md`.
-- Architecture boundaries are defined in `ARCHITECTURE.md`.
-- Local source evidence is available under `reference/`, so the next agent does not need cross-repository cloning merely to understand what game this is.
+- Content/configuration: `src/content/`.
+- Deterministic world, movement, fog, economy, progression and AI simulation: `src/domain/`.
+- Commands and persistence: `src/app/`.
+- Canvas/input/camera/panels: `src/ui/` and `src/main.js`.
 
 ## Known limitations
 
-- The complete legacy repository has not been copied here.
-- The local bundle is intended to preserve identity and representative system behaviour, not to force reuse of legacy architecture.
-- Exact legacy balance values and every old feature are not mandatory for the first rebuild mission.
+- This finite first slice has one hostile actor and no combat resolution; the raider currently creates map pressure through autonomous movement.
+- Settlements automatically work nearby tiles; citizens, production queues, improvements and tactical combat remain future work.
+- Saves use one local browser slot rather than the legacy multi-slot IndexedDB campaign system.
+- The map size is fixed at 16 × 12 for this slice, though its contents are genuinely seed-generated.
+- Final art, audio, diplomacy and a long multi-era campaign are outside the mission.
 
-## Next action
+## Best next player action
 
-Merge the setup PR, then run one Codex mission from this repository using the short prompt supplied by Creative Studio. The agent must build the first map-strategy vertical slice and must not reinterpret the genre.
+Research Agriculture, use the scout to reveal a safe route, lead the settlers at least four cells from First Hearth, establish New Frontier, and watch the red raider's approach while progressing toward Masonry.

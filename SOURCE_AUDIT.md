@@ -4,6 +4,18 @@ Audit date: 2026-07-30
 
 Gate status: **PASS for product identity and the first rebuild mission**
 
+## Files actually inspected for the 2026-08-01 production mission
+
+Before design and implementation the mission opened in full: `AGENTS.md`, `VISION.md`, `SOURCE_AUDIT.md`, `STATE.md`, `MISSION.md`, `QUALITY.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `PLAYTEST.md`, `reference/LEGACY_SOURCE_EVIDENCE.md`, and every file in `reference/legacy-snapshot/` (`config.js`, `economy.js`, `progression.js`). `README.md` was also inspected.
+
+The seven requested Creative Studio 0.3.0 paths were requested from the upstream raw GitHub repository on 2026-08-01; each returned HTTP 403. Per the mission contract this did not block production, and the local identity bundle remained authoritative and sufficient.
+
+## Delivered-source mapping
+
+- Generated square tiles, per-tile fog, terrain and resources preserve the verified spatial world model.
+- Persistent role-based units, settlements, land-derived yields, technology/status progression and a moving raider preserve the verified core simulation loop.
+- A schema-versioned browser save and recoverable camera preserve the campaign and mobile map intent without copying the legacy monolith or its storage implementation.
+
 ## Mission classification
 
 Source-dependent rebuild of an existing game.

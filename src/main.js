@@ -1,0 +1,17 @@
+import { Controller } from "./app/controller.js";
+import { UNIT_TYPES, TECHS } from "./content/config.js";
+import { settlementYield, era } from "./domain/simulation.js";
+import { Camera } from "./ui/camera.js";
+import { MapView } from "./ui/map.js";
+
+const $=id=>document.getElementById(id), canvas=$("map"), camera=new Camera(canvas);let first=true,messageTimer;
+const controller=new Controller(render);const mapView=new MapView(canvas,camera,p=>controller.command("move",p),id=>controller.select(id));
+function render(state,message=""){
+  mapView.setState(state);$("turn-badge").textContent=`Ход ${state.turn} · ${era(state)}`;for(const k of ["food","production","science"])$(k).textContent=state.resources[k];$("era").textContent=era(state);
+  const city=state.settlements[0],income=settlementYield(state,city);$("settlement").textContent=`${city.name} · население ${city.population} · за ход +${income.food} пищи, +${income.production} производства, +${income.science} знаний`;
+  const u=state.units.find(v=>v.id===state.selectedUnitId);$("unit-panel").innerHTML=u?`<h2>${UNIT_TYPES[u.type].name}</h2><p>Позиция ${u.x}:${u.y} · движение ${u.movement}/${UNIT_TYPES[u.type].movement}<br>Нажмите соседнюю клетку, чтобы идти.</p>`:"<p>Выберите свой отряд на карте.</p>";$("found").hidden=u?.type!=="settler";
+  $("research-panel").innerHTML=Object.entries(TECHS).map(([id,t])=>{const done=state.research.completed.includes(id),locked=t.requires&&!state.research.completed.includes(t.requires),active=state.research.active===id;return `<div class="tech"><strong>${done?"✓ ":""}${t.name}</strong><small>${t.description}</small>${active?`<small>${state.research.progress}/${t.cost} знаний</small>`:done?"":`<button data-tech="${id}" ${locked||state.research.active?"disabled":""}>Исследовать · ${t.cost}</button>`}</div>`}).join("");document.querySelectorAll("[data-tech]").forEach(b=>b.onclick=()=>controller.command("research",b.dataset.tech));
+  $("log").innerHTML=state.log.slice(0,8).map(x=>`<li>${x}</li>`).join("");$("end-turn").disabled=state.phase!=="player";
+  if(message){$("message").textContent=message;$("message").classList.add("visible");clearTimeout(messageTimer);messageTimer=setTimeout(()=>$("message").classList.remove("visible"),2600);}if(first){first=false;requestAnimationFrame(()=>{mapView.resize();camera.fit(state.map.width,state.map.height);mapView.draw();});}}
+$("zoom-in").onclick=()=>{camera.zoom(1.2);mapView.draw()};$("zoom-out").onclick=()=>{camera.zoom(.82);mapView.draw()};$("fit").onclick=()=>{camera.fit(controller.state.map.width,controller.state.map.height);mapView.draw()};$("focus").onclick=()=>{const u=controller.state.units.find(v=>v.id===controller.state.selectedUnitId)||controller.state.settlements[0];camera.focus(u);mapView.draw()};$("found").onclick=()=>controller.command("found");$("end-turn").onclick=()=>controller.command("end");$("save").onclick=()=>controller.save();$("new-game").onclick=()=>$("welcome").showModal();
+const dialog=$("welcome"),saved=controller.load();if(!saved.ok){controller.newGame("preview");$("continue").hidden=true;dialog.showModal();}$("create").onclick=e=>{e.preventDefault();controller.newGame($("seed").value||"epohi-1");dialog.close();camera.fit(controller.state.map.width,controller.state.map.height);mapView.draw();};$("continue").onclick=()=>dialog.close();window.addEventListener("resize",()=>{mapView.resize();mapView.draw()});

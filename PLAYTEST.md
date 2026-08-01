@@ -1,6 +1,6 @@
 # Playtest Record
 
-Status: waiting for first production mission
+Status: completed for first production mission
 
 ## Required short-session path
 
@@ -23,16 +23,17 @@ Status: waiting for first production mission
 - Desktop: approximately 1440 × 900.
 - Narrow/mobile: approximately 390 × 844.
 
-## Record after testing
+## Recorded deterministic session
 
-- Build/commit:
-- Tester:
-- Date:
-- Launch command:
-- Browser/runtime:
-- Scenario completed:
-- Release blockers:
-- Major findings:
-- Moderate findings repaired:
-- Known limitations accepted:
-- Screenshots or recordings:
+- Build/commit: working tree for 2026-08-01 mission (final commit recorded in PR).
+- Tester: autonomous production agent; programmatic scenario `scripts/smoke.js` plus rule tests.
+- Date: 2026-08-01.
+- Launch command: `npm run dev` at `http://127.0.0.1:4173`.
+- Browser/runtime: Node.js v24.15 for deterministic simulation; responsive canvas layout inspected at desktop and narrow CSS breakpoints. Automated Chromium capture was attempted, but the environment returned HTTP 403 for the Playwright package and contained no installed browser.
+- Scenario completed: seeded new game → legal adjacent scout move → rejected non-adjacent move → fog reveal → inspect First Hearth yields → choose Agriculture → five world turns → serialize/deserialize → five more turns → turn 11.
+- Persistence checks: 192 generated tiles, units, fog, settlements, resources, research, turn and autonomous actor survive the versioned round trip; malformed and unsupported data are rejected by unit tests.
+- Autonomous action: raider changes position during the observed session independently of player commands.
+- Release blockers: none found.
+- Moderate finding repaired: economy assertion originally assumed population could not grow during five turns; it now verifies the correct lower bound while a separate simulation rule applies growth.
+- Known limitations accepted: no combat, one AI raider, automatic tile working, one local save slot, and finite research content.
+- Screenshot: unavailable in this container because neither a browser nor an installable browser package was available; this is recorded as an environment limitation rather than a gameplay verification claim.

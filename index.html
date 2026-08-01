@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <meta name="theme-color" content="#101b24" />
+  <title>Эпохи — Рассвет племени</title>
+  <link rel="stylesheet" href="/src/ui/styles.css" />
+</head>
+<body>
+  <header><div><p class="eyebrow">ЭПОХИ · ПЕРВАЯ ЛЕТОПИСЬ</p><h1>Рассвет племени</h1></div><div id="turn-badge" class="turn-badge"></div></header>
+  <main>
+    <section class="map-shell" aria-label="Карта мира">
+      <canvas id="map" tabindex="0" aria-label="Интерактивная тайловая карта. Выберите отряд, затем соседнюю клетку."></canvas>
+      <div class="map-tools" aria-label="Управление камерой">
+        <button id="zoom-in" aria-label="Приблизить карту">＋</button><button id="zoom-out" aria-label="Отдалить карту">−</button><button id="fit" aria-label="Показать всю карту">Вся карта</button><button id="focus" aria-label="Вернуться к выбранному отряду">К отряду</button>
+      </div>
+      <div id="message" class="message" role="status"></div>
+    </section>
+    <aside>
+      <section class="resource-card"><div><span>Пища</span><strong id="food"></strong></div><div><span>Производство</span><strong id="production"></strong></div><div><span>Знания</span><strong id="science"></strong></div></section>
+      <section class="panel"><p class="label">Цивилизация</p><h2 id="era"></h2><p id="settlement"></p></section>
+      <section class="panel"><p class="label">Выбранный отряд</p><div id="unit-panel"></div><button id="found" class="primary">Основать поселение</button></section>
+      <section class="panel"><p class="label">Исследование</p><div id="research-panel"></div></section>
+      <section class="panel chronicle"><p class="label">Летопись</p><ol id="log"></ol></section>
+      <div class="actions"><button id="save">Сохранить</button><button id="new-game">Новый мир</button><button id="end-turn" class="primary">Завершить ход</button></div>
+    </aside>
+  </main>
+  <dialog id="welcome"><form method="dialog"><p class="eyebrow">НОВАЯ ЛЕТОПИСЬ</p><h2>Неизведанный мир ждёт</h2><p>Веди разведчика сквозь туман, развивай поселение и опереди степных налётчиков.</p><label>Семя мира <input id="seed" value="epohi-1" maxlength="24" /></label><button id="create" class="primary" value="default">Начать кампанию</button><button id="continue" value="cancel">Продолжить сохранение</button></form></dialog>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
