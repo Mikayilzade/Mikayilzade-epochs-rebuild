@@ -16,6 +16,9 @@ export function generateWorld(seed) {
   const start={x:4,y:5}; const safe=[[4,5],[5,5],[3,5],[4,4],[4,6],[5,4],[3,6]];
   for(const [x,y] of safe) tiles[indexOf(x,y)].terrain=(x+y)%3===0?"forest":"plains";
   const threat={x:12,y:7}; tiles[indexOf(threat.x,threat.y)].terrain="plains";
+  // Keep a traversable, but still terrain-varied, land route between the initial actors.
+  for(let x=start.x;x<=threat.x;x++)if(!TERRAIN[tiles[indexOf(x,threat.y)].terrain].passable)tiles[indexOf(x,threat.y)].terrain=x%3===0?"forest":"plains";
+  for(let y=start.y;y<=threat.y;y++)if(!TERRAIN[tiles[indexOf(start.x,y)].terrain].passable)tiles[indexOf(start.x,y)].terrain="plains";
   return { width:MAP.width,height:MAP.height,tiles,start,threat };
 }
 
@@ -23,7 +26,7 @@ export function createGame(seed="epohi-1") {
   const world=generateWorld(seed); const state={schemaVersion:1,seed,turn:1,phase:"player",map:world,resources:{food:4,production:3,science:0},research:{active:null,progress:0,completed:[]},units:[
     {id:"u-scout",type:"scout",owner:"player",x:4,y:5,movement:UNIT_TYPES.scout.movement},
     {id:"u-settler",type:"settler",owner:"player",x:5,y:5,movement:UNIT_TYPES.settler.movement},
-    {id:"u-raider",type:"raider",owner:"ai",x:world.threat.x,y:world.threat.y,movement:UNIT_TYPES.raider.movement}
+    {id:"u-raider",type:"raider",owner:"ai",x:world.threat.x,y:world.threat.y,movement:UNIT_TYPES.raider.movement,raids:0}
   ],settlements:[{id:"s-hearth",name:"Первый Очаг",x:4,y:5,population:1,development:0}],selectedUnitId:"u-scout",log:["Племя разбило Первый Очаг. Мир скрыт туманом."]};
   reveal(state,{x:4,y:5},2); return state;
 }

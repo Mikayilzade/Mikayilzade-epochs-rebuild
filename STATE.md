@@ -9,9 +9,9 @@ Updated: 2026-08-01
 - Per-tile fog is revealed by persistent scouts and settlers. Orthogonal movement spends role-specific movement points and rejects range, impassable terrain, exhausted movement and enemy occupation.
 - The First Hearth settlement has population/development and works local terrain for food, production and knowledge. A settler may found a distant second settlement.
 - Agriculture and masonry form a prerequisite research path with visible unlock messages, yield effects and tribe → settlement → city status.
-- End turn resolves yields, population development, research, autonomous deterministic raider movement, movement refresh and fog.
-- Version 1 JSON saves validate before restoration; missing, malformed and unsupported saves fail safely.
-- Canvas camera supports mouse/touch pan, wheel/buttons zoom, whole-map fit and selected-unit refocus. The panels reflow for phone widths.
+- End turn resolves yields, population development, research, autonomous deterministic raider movement and consequential raids, movement refresh and fog.
+- Version 1 JSON saves validate the complete map shape, terrain, resources, entity bounds and identifiers before restoration; missing, malformed and unsupported saves fail safely.
+- Canvas camera supports mouse/touch pan, two-finger pinch and wheel/buttons zoom, whole-map fit and selected-unit refocus. The panels reflow for phone widths.
 - Pure-rule automated tests and the deterministic ten-turn save/reload smoke scenario pass; production output is generated in `dist/`.
 
 ## Verified legacy state
@@ -42,7 +42,7 @@ Exact evidence and source references are in `SOURCE_AUDIT.md` and `reference/LEG
 
 ## Known limitations
 
-- This finite first slice has one hostile actor and no combat resolution; the raider currently creates map pressure through autonomous movement.
+- This finite first slice has one hostile actor and no tactical combat resolution; the raider creates map pressure through autonomous movement and production-stealing raids near the capital.
 - Settlements automatically work nearby tiles; citizens, production queues, improvements and tactical combat remain future work.
 - Saves use one local browser slot rather than the legacy multi-slot IndexedDB campaign system.
 - The map size is fixed at 16 × 12 for this slice, though its contents are genuinely seed-generated.

@@ -31,3 +31,7 @@ The first mission uses a generated 16 × 12 square grid and deterministic random
 ## 2026-08-01 — One validated local save schema
 
 Begin with an explicit version-1 JSON envelope in localStorage and reject malformed/unsupported data without mutating the running game. Multiple campaign slots and migrations are postponed rather than coupling the simulation to a premature storage system.
+
+## 2026-08-01 — Bounded autonomous review repair
+
+Keep the existing architecture and close three quality gaps in one repair pass: validate restored campaigns deeply enough that malformed terrain and out-of-bounds entities cannot reach rendering, support genuine two-pointer camera zoom, and make the autonomous raider affect production when it reaches settlement outskirts. Tactical combat remains explicitly out of scope.
