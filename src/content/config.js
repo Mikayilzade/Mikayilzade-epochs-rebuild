@@ -15,3 +15,7 @@ export const TECHS = {
   agriculture: { name: "Земледелие", cost: 12, description: "+1 пища поселения; открывает амбар", unlock: "Амбар" },
   masonry: { name: "Каменная кладка", cost: 22, requires: "agriculture", description: "+1 производство; статус «Город»", unlock: "Каменоломня" }
 };
+export const BUILDINGS = {
+  granary: { name: "Амбар", requires: "agriculture", cost: 14, yield: { food: 2, production: 0, science: 0 } },
+  quarry: { name: "Каменоломня", requires: "masonry", cost: 22, yield: { food: 0, production: 2, science: 0 } }
+};

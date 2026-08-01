@@ -1,5 +1,5 @@
 import { Controller } from "./app/controller.js";
-import { UNIT_TYPES, TECHS } from "./content/config.js";
+import { BUILDINGS, UNIT_TYPES, TECHS } from "./content/config.js";
 import { settlementYield, era } from "./domain/simulation.js";
 import { Camera } from "./ui/camera.js";
 import { MapView } from "./ui/map.js";
@@ -9,6 +9,7 @@ const controller=new Controller(render);const mapView=new MapView(canvas,camera,
 function render(state,message=""){
   mapView.setState(state);$("turn-badge").textContent=`Ход ${state.turn} · ${era(state)}`;for(const k of ["food","production","science"])$(k).textContent=state.resources[k];$("era").textContent=era(state);
   const city=state.settlements[0],income=settlementYield(state,city);$("settlement").textContent=`${city.name} · население ${city.population} · за ход +${income.food} пищи, +${income.production} производства, +${income.science} знаний`;
+  $("building-panel").innerHTML=Object.entries(BUILDINGS).map(([id,building])=>{const built=(city.buildings??[]).includes(id),unlocked=state.research.completed.includes(building.requires);if(built)return `<div class="tech"><strong>✓ ${building.name}</strong><small>Работает в поселении</small></div>`;if(!unlocked)return "";return `<div class="tech"><strong>${building.name}</strong><small>Стоимость: ${building.cost} производства</small><button data-building="${id}" ${state.resources.production<building.cost?"disabled":""}>Построить</button></div>`}).join("");document.querySelectorAll("[data-building]").forEach(button=>button.onclick=()=>controller.command("build",{settlementId:city.id,buildingId:button.dataset.building}));
   const u=state.units.find(v=>v.id===state.selectedUnitId);$("unit-panel").innerHTML=u?`<h2>${UNIT_TYPES[u.type].name}</h2><p>Позиция ${u.x}:${u.y} · движение ${u.movement}/${UNIT_TYPES[u.type].movement}<br>Нажмите соседнюю клетку, чтобы идти.</p>`:"<p>Выберите свой отряд на карте.</p>";$("found").hidden=u?.type!=="settler";
   $("research-panel").innerHTML=Object.entries(TECHS).map(([id,t])=>{const done=state.research.completed.includes(id),locked=t.requires&&!state.research.completed.includes(t.requires),active=state.research.active===id;return `<div class="tech"><strong>${done?"✓ ":""}${t.name}</strong><small>${t.description}</small>${active?`<small>${state.research.progress}/${t.cost} знаний</small>`:done?"":`<button data-tech="${id}" ${locked||state.research.active?"disabled":""}>Исследовать · ${t.cost}</button>`}</div>`}).join("");document.querySelectorAll("[data-tech]").forEach(b=>b.onclick=()=>controller.command("research",b.dataset.tech));
   $("log").innerHTML=state.log.slice(0,8).map(x=>`<li>${x}</li>`).join("");$("end-turn").disabled=state.phase!=="player";

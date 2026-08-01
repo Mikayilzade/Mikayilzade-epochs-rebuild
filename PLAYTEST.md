@@ -30,11 +30,11 @@ Status: completed for first production mission
 - Date: 2026-08-01.
 - Launch command: `npm run dev` at `http://127.0.0.1:4173`.
 - Browser/runtime: Node.js v24.15 for deterministic simulation; responsive canvas layout inspected at desktop and narrow CSS breakpoints. Automated Chromium capture was attempted, but the environment returned HTTP 403 for the Playwright package and contained no installed browser.
-- Scenario completed: seeded new game → legal adjacent scout move → rejected non-adjacent move → fog reveal → inspect First Hearth yields → choose Agriculture → five world turns → serialize/deserialize → seven more turns → turn 13.
-- Persistence checks: 192 generated tiles, units, fog, settlements, resources, research, turn and autonomous actor survive the versioned round trip; malformed and unsupported data are rejected by unit tests.
+- Scenario completed: seeded new game → legal adjacent scout move → rejected non-adjacent move → fog reveal → inspect First Hearth yields → choose Agriculture → six world turns → spend 14 production on an Ambar → serialize/deserialize → verify the building → six more turns → turn 13.
+- Persistence checks: 192 generated tiles, units, fog, settlements, resources, research, purchased building, turn and autonomous actor survive the versioned round trip; malformed, unsupported and unknown-building data are rejected, while early schema-one settlements receive an empty building list.
 - Autonomous action: the raider changes position independently, reaches the capital outskirts and steals production in a recorded raid.
 - Release blockers: none found.
 - Moderate finding repaired: economy assertion originally assumed population could not grow during five turns; it now verifies the correct lower bound while a separate simulation rule applies growth.
-- Bounded repair: added consequential raids, deep structural save validation (including unsafe terrain/entity positions), and two-pointer pinch zoom; eight focused rule tests now pass.
-- Known limitations accepted: no tactical combat, one AI raider, automatic tile working, one local save slot, and finite research content.
+- Completed repair: the prior pass added consequential raids, deep structural save validation and pinch zoom; this completion pass replaces the text-only research promise with real production spending, persistent buildings and observable yield bonuses. Ten focused rule tests now pass.
+- Known limitations accepted: no tactical combat, one AI raider, automatic tile working, instant building completion, one local save slot, and finite research content.
 - Screenshot: unavailable in this container because neither a browser nor an installable browser package was available; this is recorded as an environment limitation rather than a gameplay verification claim.

@@ -1,4 +1,4 @@
-import { TERRAIN, UNIT_TYPES } from "../content/config.js";
+import { BUILDINGS, TERRAIN, UNIT_TYPES } from "../content/config.js";
 
 export const SAVE_KEY = "epohi-rebuild-campaign";
 export const SAVE_SCHEMA_VERSION = 1;
@@ -28,7 +28,9 @@ function validateGame(game) {
   if (!Array.isArray(game.settlements) || game.settlements.length < 1 ||
     !game.settlements.every(settlement => positionIsValid(settlement, game.map) &&
       typeof settlement.name === "string" && integer(settlement.population, 1) &&
-      integer(settlement.development))) return false;
+      integer(settlement.development) && Array.isArray(settlement.buildings) &&
+      settlement.buildings.every(building => Object.hasOwn(BUILDINGS, building)) &&
+      new Set(settlement.buildings).size === settlement.buildings.length)) return false;
   if (!Array.isArray(game.research?.completed) ||
     (game.selectedUnitId !== null && !game.units.some(unit => unit.id === game.selectedUnitId))) return false;
   return Array.isArray(game.log);
@@ -44,6 +46,10 @@ export function deserialize(raw) {
     const data = JSON.parse(raw);
     if (data.schemaVersion !== SAVE_SCHEMA_VERSION) {
       return { ok: false, error: "Версия сохранения не поддерживается." };
+    }
+    // Schema 1 saves created before buildings were added remain valid.
+    if (Array.isArray(data.game?.settlements)) {
+      for (const settlement of data.game.settlements) settlement.buildings ??= [];
     }
     if (!validateGame(data.game)) return { ok: false, error: "Сохранение повреждено." };
     return { ok: true, state: data.game };

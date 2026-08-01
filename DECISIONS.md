@@ -35,3 +35,7 @@ Begin with an explicit version-1 JSON envelope in localStorage and reject malfor
 ## 2026-08-01 — Bounded autonomous review repair
 
 Keep the existing architecture and close three quality gaps in one repair pass: validate restored campaigns deeply enough that malformed terrain and out-of-bounds entities cannot reach rendering, support genuine two-pointer camera zoom, and make the autonomous raider affect production when it reaches settlement outskirts. Tactical combat remains explicitly out of scope.
+
+## 2026-08-01 — Research unlocks must be playable, not labels
+
+Agriculture and masonry now unlock production-funded buildings rather than merely announcing future content. Buildings are content data, persist in settlement state and contribute to land-derived income. They complete immediately in this compact slice; a production queue can later replace the purchase timing without changing research, settlement or rendering boundaries.

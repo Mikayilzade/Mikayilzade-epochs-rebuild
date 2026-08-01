@@ -27,7 +27,7 @@ export function createGame(seed="epohi-1") {
     {id:"u-scout",type:"scout",owner:"player",x:4,y:5,movement:UNIT_TYPES.scout.movement},
     {id:"u-settler",type:"settler",owner:"player",x:5,y:5,movement:UNIT_TYPES.settler.movement},
     {id:"u-raider",type:"raider",owner:"ai",x:world.threat.x,y:world.threat.y,movement:UNIT_TYPES.raider.movement,raids:0}
-  ],settlements:[{id:"s-hearth",name:"Первый Очаг",x:4,y:5,population:1,development:0}],selectedUnitId:"u-scout",log:["Племя разбило Первый Очаг. Мир скрыт туманом."]};
+  ],settlements:[{id:"s-hearth",name:"Первый Очаг",x:4,y:5,population:1,development:0,buildings:[]}],selectedUnitId:"u-scout",log:["Племя разбило Первый Очаг. Мир скрыт туманом."]};
   reveal(state,{x:4,y:5},2); return state;
 }
 
