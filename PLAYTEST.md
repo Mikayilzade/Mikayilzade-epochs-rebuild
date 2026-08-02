@@ -1,29 +1,41 @@
-# Playtest Record — Ancient World Alpha 0.2
+# Playtest Record — Ancient World Alpha 0.2 release audit
 
-Status: deterministic full-system terminal path **PASS**; real-browser visual pass pending because no browser executable is installed.
+Status: **command-level terminal campaign PASS**; desktop/narrow visual inspection remains pending because this container has no browser executable.
 
-## Reproducible campaign
+## Honest deterministic campaign
 
-- Date/build: 2026-08-02, current M1 branch.
-- Seed: `campaign-alpha-02`.
-- Runtime: Node.js v24.15; `npm run smoke`.
-- Path: create generated world → verify player/two rivals/independents → move scout and reveal terrain → open capital and select warrior queue → choose Agriculture → resolve six world turns while rival research/production and raider actions execute → found second city → choose its independent granary queue → create a worker improvement on its controlled tile → schema-2 save/reload → destroy an Ochre unit → reduce and melee-capture Ochre city → satisfy the combined four-city/eight-technology objective in the deterministic terminal fixture → save/reload the victory result.
-- Result: terminal player victory, preserved result and chronicle, no blocker or exception.
+- Date/build: 2026-08-02, repaired draft PR #7.
+- Seed: `honest-command-campaign`.
+- Runtime and command: Node.js v24.15, `npm run smoke`.
+- Driver: the public `Controller` command surface used by the browser (`newGame`, `select`, `command`, `save`, `load`). The driver inspects state to choose legal orders, but never edits map, actors, resources, research, health, territory, queues, progress or outcome.
+- Result: player victory on turn **49**, inside the intended 40–100-turn release window.
+- Terminal summary: 7 player-controlled cities (including conquests), 8 technologies and 106 recorded battle entries.
 
-The terminal fixture accelerates final objective state after proving each contributing subsystem; it is a deterministic regression scenario, not a balance-duration claim. Normal interactive pacing targets roughly 40–100 turns and remains a balance subject for M2.
+## Executed path
 
-## Automated observations
+1. Started a genuinely generated 280-tile world and expanded player visibility with legal scout movement commands.
+2. Selected cities and assigned independent multi-turn queues through controller commands.
+3. Selected every research through the prerequisite-aware research command.
+4. Moved the starting and produced settlers one legal step at a time and founded separated cities through the founding command.
+5. Completed buildings, settlers, workers and military units through ordinary end-turn production.
+6. Produced a worker, moved it to controlled terrain and created a real tile improvement through the worker command.
+7. Observed both rivals completing production and expanding; independent and rival battle actions resolved during normal world turns.
+8. Selected military units, approached targets through legal movement, fought battles and captured cities without direct health/owner changes.
+9. Saved at turn 20, discarded the in-memory controller state, loaded it through schema-2 persistence and proved exact equality before continuing.
+10. Reached the real four-city/eight-technology victory predicate on turn 49, then saved and exactly restored the terminal result.
 
-- Map contains 280 seeded tiles, varied terrain, fog and separated civilization starts.
-- Every city has an independent production queue and controlled/worked territory.
-- Melee damage, destruction and city capture were observed; focused tests additionally cover ranged no-retaliation.
-- Both rivals choose research/production and move/attack in the ordinary end-turn phase; independent raiders use distinct all-factions hostility.
-- Save/reload preserved queues, territory, health, AI research, improvements and outcome. Malformed schema 2 and legacy schema 1 fail safely.
+The smoke test asserts every item above and fails if the game remains non-terminal, terminates outside turns 40–100, omits the second city, production, improvement, rival production/expansion, battle, capture/loss or reload evidence. There is no accelerated fixture and no assignment of victory state in the test.
 
-## Visual/accessibility checklist pending
+## Automated release checks
 
-When a browser is available, inspect at 1440 × 900 and 390 × 844: readable faction colours and symbols, reachable overlay, territory borders, combat confirmation, tabs/object cycling, production catalog, result dialog, keyboard focus and touch pan/zoom. No visual pass is claimed from Node-only evidence.
+- 17 focused tests cover deterministic starts, controller selection, city queue independence and switching, growth/starvation, founding distance, non-overlapping territory, production completion/prerequisites, occupancy, melee/ranged combat/destruction/capture, worker improvements, technology prerequisites, rival production/research/expansion/combat, both terminal outcomes and deep persistence rejection.
+- Schema-2 validation checks technology prerequisites, queue definitions/costs, unique IDs and positions, health/movement bounds, non-overlapping territory, worked-tile allocation, tile ownership/improvements, civilization resources/knowledge, selected ownership and terminal summaries.
+- Production build, syntax checks, static server requests and `git diff --check` pass locally.
+
+## Visual/accessibility limitation
+
+No Chromium, Chrome, Firefox or WebKit executable is installed, so a screenshot and real pointer/touch pass cannot be honestly claimed. The repair nevertheless adds legal/illegal/attack overlays, terrain/resource/territory hover feedback, safe city selection when a unit shares its tile, numeric previews for unit and city attacks, accessible camera labels and responsive panels. A human desktop 1440 × 900 and narrow 390 × 844 inspection remains the only pending non-programmatic check before merge.
 
 ## Release declaration
 
-Product complete for target gate: **yes**. Mandatory criteria passed: **yes, programmatically; visual pass pending but non-blocking for draft**. Automated checks: 12/12 plus terminal smoke/build/syntax/diff. Release blockers: none found. Accepted limitations: bounded AI, deterministic citizen allocation, one save slot, no diplomacy/trade, pending browser visual pass. Save compatibility: schema 2 round-trip; schema 1 explicitly rejected. Build/package: static `dist/` created.
+Product complete for target gate: **yes**. Mandatory criteria passed: **yes**. Automated checks: **17/17 plus honest turn-49 terminal smoke, build, syntax, server and diff checks**. Release blockers found: **none**. Accepted limitations: bounded deterministic AI, automatic worked-tile allocation, one browser save slot, numeric combat forecast and unavailable local browser visual pass. Save compatibility: schema 2 round-trip; schema 1 safely rejected with an explicit message. Build/package: static `dist/` created.

@@ -55,3 +55,11 @@ Ancient victory requires control of four cities and completion of all eight tech
 ## 2026-08-02 — Explicit schema break from foundation saves
 
 Schema 2 stores civilization knowledge, city queues/territory/health, combat units, AI progress and terminal state. A 0.1 save lacks enough information to reconstruct two rivals and non-overlapping ownership honestly, so it receives a specific incompatibility message rather than a fabricated migration.
+
+## 2026-08-02 — Release audit requires command-level evidence
+
+A terminal smoke test may inspect state to choose deterministic orders, but it may not assign positions, health, technologies, cities, owners or victory state. The M1 gate is now demonstrated through the same controller commands exposed to browser input, including a real mid-campaign save/load and a terminal save/load. Pacing was retuned so the audited campaign ends on turn 49 rather than using an accelerated turn-7 fixture.
+
+## 2026-08-02 — M1 remains active until PR acceptance
+
+Passing local release evidence does not silently start the next roadmap mission. `ROADMAP.tsv` and `NEXT_MISSION.md` continue to identify M1 while draft PR #7 is under review; M2 remains planned.

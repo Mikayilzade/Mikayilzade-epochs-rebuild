@@ -33,7 +33,7 @@ The active program now develops the product through large autonomous release mis
 - `NEXT_MISSION.md` — the full active release mission.
 - `RELEASE_GATES.md` — evidence required to call each release complete.
 
-The current active milestone is `M2 / 0.3 Economy and Diplomacy`: strategic resources, specialization, logistics/trade, enforceable relations and economic/diplomatic AI.
+The current active milestone remains `M1 / 0.2 Ancient World Alpha` while draft PR #7 completes release acceptance. M2 remains planned and is not part of this repair.
 
 ## Read order for agents
 

@@ -1,7 +1,7 @@
 id	status	release	mission	mandatory outcome	depends_on
 M0	complete	0.1	Generated-map foundation	Generated tile map; fog; persistent scout/settler/raider; settlements; economy; research; production spending; validated save/load; camera; deterministic tests	-
-M1	complete	0.2	Ancient World Alpha	A readable and finishable ancient-era 4X campaign with city management; production queues; multiple unit roles; tactical combat; territory; at least two rival civilizations; independent peoples; victory and defeat	M0
-M2	active	0.3	Economy and Diplomacy	Strategic resources; improvements; trade routes; diplomacy; treaties; relations; city specialization; logistics; economic AI	M1
+M1	active	0.2	Ancient World Alpha	A readable and finishable ancient-era 4X campaign with city management; production queues; multiple unit roles; tactical combat; territory; at least two rival civilizations; independent peoples; victory and defeat	M0
+M2	planned	0.3	Economy and Diplomacy	Strategic resources; improvements; trade routes; diplomacy; treaties; relations; city specialization; logistics; economic AI	M1
 M3	planned	0.4	Classical-to-Medieval Transformation	Expanded tech/civic progression; governments; culture; religion or belief systems; wonders; era transitions that change play; broader content	M2
 M4	planned	0.5	Living World Simulation	Migration; independent peoples becoming states; rebellions; state collapse and union; named persistent leaders/units; emergent history ledger	M3
 M5	planned	0.7	Full Campaign Systems	Several eras through late game; multiple victory paths; world-scale pacing; diplomacy/war/economy integration; full campaign completion	M4
