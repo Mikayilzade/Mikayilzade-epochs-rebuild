@@ -1,6 +1,6 @@
 # Эпохи — rebuild
 
-This repository is the clean implementation target for rebuilding the existing map strategy `Mikayilzade/Epohi`.
+This repository is rebuilding the existing map strategy `Mikayilzade/Epohi` into a complete standalone civilization-scale 4X game.
 
 ## Играть локально
 
@@ -21,28 +21,28 @@ npm run preview
 
 ## Current status
 
-Первый вертикальный срез реализован: генерируемая тайловая карта, туман войны, постоянные отряды, поселения, экономика, исследования с реальными постройками за производство, автономная угроза и локальные сохранения. Это новая модульная реализация, не код закрытого PR и не фиксированный граф регионов.
+Release `0.1 Foundation` is merged: generated tile map, fog of war, persistent units and settlements, economy, research, production spending, autonomous threat, validated saves, camera controls and deterministic checks.
+
+This is the technical foundation, not the finished game.
+
+The active program now develops the product through large autonomous release missions toward a complete 4X campaign.
+
+## Production program
+
+- `PROGRAM.md` — final product target and pillars.
+- `AUTONOMOUS_CAMPAIGN.md` — how agents continue without micro-task supervision.
+- `ROADMAP.tsv` — release sequence from 0.1 to 1.0.
+- `NEXT_MISSION.md` — the full active release mission.
+- `RELEASE_GATES.md` — evidence required to call each release complete.
+
+The current active milestone is `M1 / 0.2 Ancient World Alpha`: a readable and finishable ancient-era campaign with real cities, production queues, territory, combat, rivals, independent actors, progression, victory and defeat.
 
 ## Read order for agents
 
-1. `AGENTS.md`
-2. `VISION.md`
-3. `SOURCE_AUDIT.md`
-4. `reference/LEGACY_SOURCE_EVIDENCE.md`
-5. exact files under `reference/legacy-snapshot/`
-6. `STATE.md`
-7. `MISSION.md`
-8. `QUALITY.md`
-9. `ARCHITECTURE.md`
-10. `DECISIONS.md`
-11. `PLAYTEST.md`
+Start with `AGENTS.md`; it contains the authoritative read order and production contract.
 
 ## Identity in one sentence
 
-A mobile-friendly turn-based civilization strategy on a generated tile map with exploration, persistent units, settlements, economy, progression, saves, and an independently acting world.
+A turn-based civilization strategy on a generated tile map with exploration, persistent cities and units, economy, conflict, era progression, saves and an independently acting world.
 
-## Next production mission
-
-Implement the finite scope in `MISSION.md` as one coherent runnable vertical slice. Do not reinterpret the game as a card-based narrative.
-
-GitHub Actions are disabled unless the mission explicitly permits them. Run checks locally and return one draft PR.
+GitHub Actions remain disabled unless the active mission explicitly permits them. Run checks locally and return one coherent draft PR per release mission.
