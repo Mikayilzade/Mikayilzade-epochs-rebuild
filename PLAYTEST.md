@@ -1,6 +1,6 @@
 # Playtest Record
 
-Status: completed for first production mission
+Status: automated path completed; real-browser visual pass pending
 
 ## Required short-session path
 
@@ -25,16 +25,16 @@ Status: completed for first production mission
 
 ## Recorded deterministic session
 
-- Build/commit: working tree for 2026-08-01 mission (final commit recorded in PR).
-- Tester: autonomous production agent; programmatic scenario `scripts/smoke.js` plus rule tests.
-- Date: 2026-08-01.
+- Build/commit: PR #4 branch `codex-deuqq4`; final stacking fix added on 2026-08-02.
+- Tester: autonomous production agent plus final focused local rule verification.
+- Date: 2026-08-02.
 - Launch command: `npm run dev` at `http://127.0.0.1:4173`.
-- Browser/runtime: Node.js v24.15 for deterministic simulation; responsive canvas layout inspected at desktop and narrow CSS breakpoints. Automated Chromium capture was attempted, but the environment returned HTTP 403 for the Playwright package and contained no installed browser.
-- Scenario completed: seeded new game → legal adjacent scout move → rejected non-adjacent move → fog reveal → inspect First Hearth yields → choose Agriculture → six world turns → spend 14 production on an Ambar → serialize/deserialize → verify the building → six more turns → turn 13.
+- Browser/runtime: the production agent used Node.js v24.15 for deterministic simulation. Automated Chromium capture was unavailable because the environment returned HTTP 403 for Playwright and contained no installed browser.
+- Scenario completed: seeded new game → reject movement onto the friendly settler → legal move to an empty adjacent tile → reject a non-adjacent move → reveal fog → inspect First Hearth yields → choose Agriculture → six world turns → spend 14 production on an Ambar → serialize/deserialize → verify the building → six more turns → turn 13.
 - Persistence checks: 192 generated tiles, units, fog, settlements, resources, research, purchased building, turn and autonomous actor survive the versioned round trip; malformed, unsupported and unknown-building data are rejected, while early schema-one settlements receive an empty building list.
 - Autonomous action: the raider changes position independently, reaches the capital outskirts and steals production in a recorded raid.
-- Release blockers: none found.
-- Moderate finding repaired: economy assertion originally assumed population could not grow during five turns; it now verifies the correct lower bound while a separate simulation rule applies growth.
-- Final focused fixes: save restoration now rejects unknown/duplicate/out-of-order research, invalid progress and buildings without their technology; chronicle entries are inserted as text nodes rather than HTML. Eleven focused rule tests now pass.
+- Automated release blockers: none found in the focused rule and smoke path.
+- Final focused fixes: restored research/building invariants are validated; chronicle entries use text nodes; occupied destination tiles are rejected so one player unit cannot hide another in an inaccessible stack.
+- Verification result: 12 focused Node rule tests passed; the updated turn-13 smoke scenario passed; syntax checks passed for the changed world, test and smoke files.
 - Known limitations accepted: no tactical combat, one AI raider, automatic tile working, instant building completion, one local save slot, and finite research content.
-- Screenshot: unavailable in this container because neither a browser nor an installable browser package was available; this is recorded as an environment limitation rather than a gameplay verification claim.
+- Pending manual check: open the game in a real desktop browser, inspect layout and controls, then repeat the basic camera interaction at a narrow/mobile viewport before merge.
