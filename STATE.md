@@ -1,54 +1,33 @@
 # Verified Current State
 
-Updated: 2026-08-02
+Updated: 2026-08-02 — release **0.2 Ancient World Alpha**
 
 ## Implemented and locally verified
 
-- A new dependency-free browser implementation presents a seeded, generated 16 × 12 tile world as the primary surface.
-- Plains, forests, hills, water and mountains have data-defined yields/passability; some land carries visible resources.
-- Per-tile fog is revealed by persistent scouts and settlers. Orthogonal movement spends role-specific movement points and rejects range, impassable terrain, exhausted movement and every occupied destination tile, preventing inaccessible unit stacks.
-- The First Hearth settlement has population/development and works local terrain for food, production and knowledge. A settler may found a distant second settlement.
-- Agriculture and masonry form a prerequisite research path with visible unlock messages, tribe → settlement → city status, and production-funded Ambar/Quarry construction whose yields affect later turns.
-- End turn resolves yields, population development, research, autonomous deterministic raider movement and consequential raids, movement refresh and fog.
-- Version 1 JSON saves validate the complete map shape, terrain, resources, entity bounds, identifiers, research prerequisites/progress and building unlock relationships before restoration; missing, malformed and unsupported saves fail safely.
-- Canvas camera supports mouse/touch pan, two-finger pinch and wheel/buttons zoom, whole-map fit and selected-unit refocus. The panels reflow for phone widths.
-- Twelve pure-rule automated tests and the deterministic turn-13 save/reload smoke scenario pass; the smoke path rejects friendly stacking, researches Agriculture, spends production on an Ambar, restores it, and observes a raid. Chronicle entries are rendered as text rather than restored HTML. Production output is generated in `dist/`.
+- A seeded 20 × 14 generated world is the main play surface. Terrain, resources, fog, civilization knowledge, visible coloured territory and tile improvements persist.
+- The player, two rival civilizations (Ochre and River), and independent raiders occupy and act in the same world. Rivals research, produce, move, evaluate targets and fight; independent raiders attack every state.
+- Cities persist owner, name, population, food/growth, health/defence, territory, worked tiles, buildings and an independent multi-turn unit/building queue. Changing to a different project loses progress; retaining the same project retains it.
+- Five producible player roles are available: scout, settler, warrior, archer and worker, plus bronze spearmen. Requirements are data-driven and enforced.
+- Deterministic combat includes melee/ranged range, health, damage, retaliation, terrain defence, destruction, city defence and melee capture. The UI provides expected damage before attacks and the chronicle records results.
+- Eight prerequisite-linked ancient technologies unlock seven buildings and unit roles. Writing produces the material “City Union” status transition.
+- Victory requires four controlled cities and all eight ancient technologies. Loss of all cities is defeat; a result summary records turn, cities, knowledge and battle count. Rivals evaluate the same objective.
+- Schema 2 persistence validates the complete campaign: map/territory, units and health, cities/queues, civilization research/resources, AI actors, objective and chronicle. Schema 1 is rejected with a specific safe message because the new multi-civilization topology cannot be faithfully inferred.
+- The responsive canvas identifies every role with faction colour, readable letters, city/population marks, health bars, reach overlays, territory borders, improvements and an in-game legend. Object cycling, tabbed contextual panels and narrow stacking keep core controls accessible.
 
-## Verified legacy state
+## Verification evidence
 
-The original repository is `https://github.com/Mikayilzade/Epohi`.
+- 12 Node domain tests cover deterministic starts, city queues, growth/starvation, founding/territory, production/unlocks, occupancy, melee/ranged combat/destruction/capture, improvements, progression, AI, outcomes and persistence.
+- `scripts/smoke.js` deterministically exercises exploration, research, two independent city queues, production, improvement, rival/independent world phases, save/reload, battle, capture and terminal victory.
+- Static production build completes in `dist/`; local HTTP launch responds successfully.
 
-Verified legacy sources show:
+## Known 0.2 limitations
 
-- generated maps with sizes 20, 28, and 36 tiles per side;
-- terrain, features, improvements, buildings, units, technologies, rivals, and barbarians;
-- fog/reveal state on individual tiles;
-- player and rival cities and units;
-- tile-based economy with food, production, gold, and science;
-- civilization progression from tribe toward settlement, city, kingdom, and empire;
-- persistent campaigns, multiple save slots, autosaves, camera persistence, and save-schema migration;
-- map camera with pan, pinch, fit-to-map, focus, and deep tile zoom;
-- generated persistent unit names and navigation through multiple units on one tile;
-- barbarian camps that spawn, are discovered independently, create units, and can return after destruction.
+- AI is intentionally bounded and tactical rather than expert; there is no diplomacy, trade, alliances or economic specialization yet.
+- Territory expands on city growth using a deterministic nearest-tile rule; direct citizen reassignment is deferred.
+- One browser save slot is supported. Schema 1 receives an explicit incompatibility message rather than a lossy migration.
+- Combat preview is numeric and deterministic; it does not yet visualize every modifier separately.
+- Browser automation is unavailable in this container, so the release retains a pending human visual/accessibility pass at desktop and 390 px width.
 
-Exact evidence and source references are in `SOURCE_AUDIT.md` and `reference/LEGACY_SOURCE_EVIDENCE.md`.
+## Next action
 
-## Tested boundaries
-
-- Content/configuration: `src/content/`.
-- Deterministic world, movement, fog, economy, progression and AI simulation: `src/domain/`.
-- Commands and persistence: `src/app/`.
-- Canvas/input/camera/panels: `src/ui/` and `src/main.js`.
-
-## Known limitations
-
-- This finite first slice has one hostile actor and no tactical combat resolution; the raider creates map pressure through autonomous movement and production-stealing raids near the capital.
-- Settlements automatically work nearby tiles and buildings complete immediately when purchased; citizens and multi-turn production queues remain future work.
-- Saves use one local browser slot rather than the legacy multi-slot IndexedDB campaign system.
-- The map size is fixed at 16 × 12 for this slice, though its contents are genuinely seed-generated.
-- Final art, audio, diplomacy and a long multi-era campaign are outside the mission.
-- Automated browser capture was unavailable in the production environment, so a real desktop and narrow-viewport visual pass is still required before merge.
-
-## Best next player action
-
-Run the PR branch locally, verify the desktop layout and core interactions, then inspect camera controls at a narrow viewport. After the visual pass, merge PR #4 if no blocker is found.
+Begin M2 Economy and Diplomacy from `NEXT_MISSION.md`, preserving schema-2 compatibility and the complete terminal campaign.

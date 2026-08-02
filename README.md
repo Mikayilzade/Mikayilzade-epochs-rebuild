@@ -21,9 +21,7 @@ npm run preview
 
 ## Current status
 
-Release `0.1 Foundation` is merged: generated tile map, fog of war, persistent units and settlements, economy, research, production spending, autonomous threat, validated saves, camera controls and deterministic checks.
-
-This is the technical foundation, not the finished game.
+Release `0.2 Ancient World Alpha` is a complete short 4X campaign: generated map and fog, independently managed cities and production queues, territory and improvements, six unit roles, deterministic combat/capture, two rival civilizations, independent raiders, eight technologies, victory/defeat and validated saves.
 
 The active program now develops the product through large autonomous release missions toward a complete 4X campaign.
 
@@ -35,7 +33,7 @@ The active program now develops the product through large autonomous release mis
 - `NEXT_MISSION.md` — the full active release mission.
 - `RELEASE_GATES.md` — evidence required to call each release complete.
 
-The current active milestone is `M1 / 0.2 Ancient World Alpha`: a readable and finishable ancient-era campaign with real cities, production queues, territory, combat, rivals, independent actors, progression, victory and defeat.
+The current active milestone is `M2 / 0.3 Economy and Diplomacy`: strategic resources, specialization, logistics/trade, enforceable relations and economic/diplomatic AI.
 
 ## Read order for agents
 

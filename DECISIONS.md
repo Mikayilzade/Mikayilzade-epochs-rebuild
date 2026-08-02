@@ -39,3 +39,19 @@ Keep the existing architecture and close three quality gaps in one repair pass: 
 ## 2026-08-01 — Research unlocks must be playable, not labels
 
 Agriculture and masonry now unlock production-funded buildings rather than merely announcing future content. Buildings are content data, persist in settlement state and contribute to land-derived income. They complete immediately in this compact slice; a production queue can later replace the purchase timing without changing research, settlement or rendering boundaries.
+
+## 2026-08-02 — Compact shared-rules Ancient World
+
+Use a 20 × 14 seeded map and one serializable actor model for the player, two rivals and independent peoples. Rivals use the same city yields, research, production, movement, health and objective state as the player; their strategy is deliberately deterministic and bounded so campaign checks remain reproducible.
+
+## 2026-08-02 — Territory, queues and combat are domain state
+
+Cities explicitly own territory indices, worked indices, food, defence and one multi-turn queue. Switching away loses progress while reselecting the same project retains it. Combat is deterministic: strength against terrain-adjusted defence yields damage, melee retaliation applies, ranged attacks beyond adjacency avoid retaliation, and only melee captures a city. These rules remain independent of Canvas and DOM code.
+
+## 2026-08-02 — Objective combines expansion and knowledge
+
+Ancient victory requires control of four cities and completion of all eight technologies. This avoids an arbitrary turn ending and requires both expansion/conflict and development. Every civilization stores objective progress; loss of all player cities is terminal defeat.
+
+## 2026-08-02 — Explicit schema break from foundation saves
+
+Schema 2 stores civilization knowledge, city queues/territory/health, combat units, AI progress and terminal state. A 0.1 save lacks enough information to reconstruct two rivals and non-overlapping ownership honestly, so it receives a specific incompatibility message rather than a fabricated migration.

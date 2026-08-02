@@ -1,44 +1,8 @@
-import { MAP, TERRAIN, UNIT_TYPES } from "../content/config.js";
-import { hashSeed, rng } from "./random.js";
-
-export const indexOf = (x, y, width = MAP.width) => y * width + x;
-export const distance = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-export function neighbors(state, pos) { return [{x:pos.x+1,y:pos.y},{x:pos.x-1,y:pos.y},{x:pos.x,y:pos.y+1},{x:pos.x,y:pos.y-1}].filter(p => p.x >= 0 && p.y >= 0 && p.x < state.map.width && p.y < state.map.height); }
-export function reveal(state, pos, radius) { for (let y=0;y<state.map.height;y++) for(let x=0;x<state.map.width;x++) if(distance(pos,{x,y})<=radius) state.map.tiles[indexOf(x,y,state.map.width)].revealed=true; }
-
-export function generateWorld(seed) {
-  const random = rng(hashSeed(seed)); const tiles=[];
-  for (let y=0;y<MAP.height;y++) for(let x=0;x<MAP.width;x++) {
-    const edge = x===0||y===0||x===MAP.width-1||y===MAP.height-1; const v=random();
-    let terrain=edge&&v<.72?"water":v<.13?"water":v<.27?"forest":v<.39?"hills":v<.46?"mountains":"plains";
-    tiles.push({x,y,terrain,revealed:false,resource: terrain==="forest"&&random()<.18?"Дичь":terrain==="hills"&&random()<.18?"Кремень":null});
-  }
-  const start={x:4,y:5}; const safe=[[4,5],[5,5],[3,5],[4,4],[4,6],[5,4],[3,6]];
-  for(const [x,y] of safe) tiles[indexOf(x,y)].terrain=(x+y)%3===0?"forest":"plains";
-  const threat={x:12,y:7}; tiles[indexOf(threat.x,threat.y)].terrain="plains";
-  // Keep a traversable, but still terrain-varied, land route between the initial actors.
-  for(let x=start.x;x<=threat.x;x++)if(!TERRAIN[tiles[indexOf(x,threat.y)].terrain].passable)tiles[indexOf(x,threat.y)].terrain=x%3===0?"forest":"plains";
-  for(let y=start.y;y<=threat.y;y++)if(!TERRAIN[tiles[indexOf(start.x,y)].terrain].passable)tiles[indexOf(start.x,y)].terrain="plains";
-  return { width:MAP.width,height:MAP.height,tiles,start,threat };
-}
-
-export function createGame(seed="epohi-1") {
-  const world=generateWorld(seed); const state={schemaVersion:1,seed,turn:1,phase:"player",map:world,resources:{food:4,production:3,science:0},research:{active:null,progress:0,completed:[]},units:[
-    {id:"u-scout",type:"scout",owner:"player",x:4,y:5,movement:UNIT_TYPES.scout.movement},
-    {id:"u-settler",type:"settler",owner:"player",x:5,y:5,movement:UNIT_TYPES.settler.movement},
-    {id:"u-raider",type:"raider",owner:"ai",x:world.threat.x,y:world.threat.y,movement:UNIT_TYPES.raider.movement,raids:0}
-  ],settlements:[{id:"s-hearth",name:"Первый Очаг",x:4,y:5,population:1,development:0,buildings:[]}],selectedUnitId:"u-scout",log:["Племя разбило Первый Очаг. Мир скрыт туманом."]};
-  reveal(state,{x:4,y:5},2); return state;
-}
-
-export function canMove(state, unit, target) {
-  if(!unit||unit.owner!=="player") return {ok:false,reason:"Это не ваш отряд."};
-  if(unit.movement<1) return {ok:false,reason:"Очки движения исчерпаны."};
-  if(distance(unit,target)!==1) return {ok:false,reason:"Можно двигаться только на соседнюю клетку."};
-  if(target.x<0||target.y<0||target.x>=state.map.width||target.y>=state.map.height) return {ok:false,reason:"За краем карты пути нет."};
-  const tile=state.map.tiles[indexOf(target.x,target.y,state.map.width)];
-  if(!TERRAIN[tile.terrain].passable) return {ok:false,reason:`${TERRAIN[tile.terrain].name}: местность непроходима.`};
-  if(state.units.some(u=>u.id!==unit.id&&u.x===target.x&&u.y===target.y)) return {ok:false,reason:"Клетка занята другим отрядом."};
-  return {ok:true};
-}
-export function moveUnit(state,id,target){const unit=state.units.find(u=>u.id===id);const verdict=canMove(state,unit,target);if(!verdict.ok)return verdict;unit.x=target.x;unit.y=target.y;unit.movement--;reveal(state,target,UNIT_TYPES[unit.type].vision);state.log.unshift(`${UNIT_TYPES[unit.type].name} исследует новую клетку.`);return {ok:true};}
+import {CIVS,MAP,TERRAIN,UNIT_TYPES} from "../content/config.js";import{hashSeed,rng}from"./random.js";
+export const indexOf=(x,y,w=MAP.width)=>y*w+x;export const distance=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);export const neighbors=(s,p)=>[{x:p.x+1,y:p.y},{x:p.x-1,y:p.y},{x:p.x,y:p.y+1},{x:p.x,y:p.y-1}].filter(q=>q.x>=0&&q.y>=0&&q.x<s.map.width&&q.y<s.map.height);export function reveal(s,p,r,owner="player"){s.knowledge[owner]??=[];const known=new Set(s.knowledge[owner]);for(let y=0;y<s.map.height;y++)for(let x=0;x<s.map.width;x++)if(distance(p,{x,y})<=r)known.add(indexOf(x,y,s.map.width));s.knowledge[owner]=[...known].sort((a,b)=>a-b);if(owner==="player")for(const i of known)s.map.tiles[i].revealed=true;}
+function unit(id,type,owner,x,y){return{id,type,owner,x,y,movement:UNIT_TYPES[type].movement,health:UNIT_TYPES[type].maxHealth,fortified:false};}function city(id,name,owner,x,y){return{id,name,owner,x,y,population:2,food:0,health:100,maxHealth:100,defence:20,buildings:[],queue:null,territory:[],worked:[]};}
+export function generateWorld(seed){const random=rng(hashSeed(seed)),tiles=[];for(let y=0;y<MAP.height;y++)for(let x=0;x<MAP.width;x++){const edge=x===0||y===0||x===MAP.width-1||y===MAP.height-1,v=random();let terrain=edge&&v<.75?"water":v<.1?"water":v<.25?"forest":v<.37?"hills":v<.43?"mountains":v<.52?"desert":"plains";tiles.push({x,y,terrain,revealed:false,resource:terrain==="hills"&&random()<.2?"Медь":terrain==="forest"&&random()<.2?"Дичь":null,owner:null,improvement:null});}const starts=[{x:3,y:4},{x:15,y:3},{x:15,y:10},{x:9,y:11},{x:10,y:6}];for(const p of starts)for(let y=p.y-2;y<=p.y+2;y++)for(let x=p.x-2;x<=p.x+2;x++)if(x>0&&y>0&&x<MAP.width-1&&y<MAP.height-1&&!TERRAIN[tiles[indexOf(x,y)].terrain].passable)tiles[indexOf(x,y)].terrain=(x+y)%3?"plains":"forest";return{width:MAP.width,height:MAP.height,tiles,starts};}
+export function claimTerritory(s,c){const available=s.map.tiles.filter(t=>distance(t,c)<=2&&(!t.owner||t.owner===c.owner)).sort((a,b)=>distance(a,c)-distance(b,c)||a.y-b.y||a.x-b.x).slice(0,9);c.territory=available.map(t=>indexOf(t.x,t.y,s.map.width));for(const i of c.territory)s.map.tiles[i].owner=c.owner;c.worked=c.territory.slice(0,Math.min(c.population+1,c.territory.length));}
+export function createGame(seed="epohi-2"){const map=generateWorld(seed),s={schemaVersion:2,seed,turn:1,phase:"player",map,knowledge:{player:[],ochre:[],river:[],independent:[]},civilizations:Object.entries(CIVS).map(([id,c])=>({id,...c,research:{active:null,progress:0,completed:[]},resources:{food:8,production:0,science:0},defeated:false})),units:[unit("p-scout","scout","player",3,4),unit("p-settler","settler","player",4,4),unit("p-warrior","warrior","player",3,5),unit("o-warrior","warrior","ochre",15,4),unit("r-warrior","warrior","river",15,9),unit("i-raider-1","raider","independent",9,11),unit("i-raider-2","raider","independent",10,6)],cities:[city("c-dawn","Заря","player",3,4),city("c-ochre","Охра","ochre",15,3),city("c-river","Излучина","river",15,10)],selected:{kind:"unit",id:"p-scout"},status:"playing",winner:null,summary:null,log:["Ход 1. Заря начинает летопись древнего мира."],tutorial:{dismissed:false}};for(const c of s.cities)claimTerritory(s,c);for(const u of s.units)reveal(s,u,UNIT_TYPES[u.type].vision,u.owner);return s;}
+export function canMove(s,u,t){if(!u||u.owner!=="player")return{ok:false,reason:"Это не ваш отряд."};if(u.movement<1)return{ok:false,reason:"Движение исчерпано."};if(distance(u,t)!==1)return{ok:false,reason:"Выберите соседнюю клетку."};const tile=s.map.tiles[indexOf(t.x,t.y,s.map.width)];if(!tile||!TERRAIN[tile.terrain].passable)return{ok:false,reason:"Путь непроходим."};if(s.units.some(v=>v.id!==u.id&&v.x===t.x&&v.y===t.y))return{ok:false,reason:"Клетка занята; выберите атаку."};return{ok:true};}
+export function moveUnit(s,id,t){const u=s.units.find(v=>v.id===id),r=canMove(s,u,t);if(!r.ok)return r;u.x=t.x;u.y=t.y;u.movement--;u.fortified=false;reveal(s,u,UNIT_TYPES[u.type].vision,u.owner);return{ok:true};}

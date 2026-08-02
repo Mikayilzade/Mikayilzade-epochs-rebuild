@@ -1,21 +1,8 @@
-export const MAP = { width: 16, height: 12 };
-export const TERRAIN = {
-  plains: { name: "Равнина", color: "#82965a", passable: true, yield: { food: 2, production: 1, science: 0 } },
-  forest: { name: "Лес", color: "#315f45", passable: true, yield: { food: 1, production: 2, science: 0 } },
-  hills: { name: "Холмы", color: "#80745d", passable: true, yield: { food: 0, production: 2, science: 1 } },
-  water: { name: "Вода", color: "#286078", passable: false, yield: { food: 2, production: 0, science: 1 } },
-  mountains: { name: "Горы", color: "#64666b", passable: false, yield: { food: 0, production: 0, science: 2 } }
-};
-export const UNIT_TYPES = {
-  scout: { name: "Разведчик", icon: "◆", movement: 3, vision: 2 },
-  settler: { name: "Поселенцы", icon: "●", movement: 2, vision: 1 },
-  raider: { name: "Степной налётчик", icon: "▲", movement: 2, vision: 1 }
-};
-export const TECHS = {
-  agriculture: { name: "Земледелие", cost: 12, description: "+1 пища поселения; открывает амбар", unlock: "Амбар" },
-  masonry: { name: "Каменная кладка", cost: 22, requires: "agriculture", description: "+1 производство; статус «Город»", unlock: "Каменоломня" }
-};
-export const BUILDINGS = {
-  granary: { name: "Амбар", requires: "agriculture", cost: 14, yield: { food: 2, production: 0, science: 0 } },
-  quarry: { name: "Каменоломня", requires: "masonry", cost: 22, yield: { food: 0, production: 2, science: 0 } }
-};
+export const MAP={width:20,height:14};
+export const TERRAIN={plains:{name:"Равнина",color:"#87975d",passable:true,defence:0,yield:{food:2,production:1,science:0}},forest:{name:"Лес",color:"#35664a",passable:true,defence:2,yield:{food:1,production:2,science:0}},hills:{name:"Холмы",color:"#81745c",passable:true,defence:2,yield:{food:0,production:2,science:1}},water:{name:"Вода",color:"#28627b",passable:false,defence:0,yield:{food:2,production:0,science:1}},mountains:{name:"Горы",color:"#65676d",passable:false,defence:3,yield:{food:0,production:0,science:2}},desert:{name:"Пустыня",color:"#b99a61",passable:true,defence:0,yield:{food:0,production:1,science:0}}};
+export const UNIT_TYPES={scout:{name:"Разведчик",symbol:"R",role:"recon",cost:18,movement:3,vision:3,maxHealth:60,strength:7,range:1,requires:"tracking"},settler:{name:"Поселенцы",symbol:"P",role:"settler",cost:34,movement:2,vision:2,maxHealth:50,strength:1,range:0,requires:"agriculture"},warrior:{name:"Воин",symbol:"W",role:"melee",cost:22,movement:2,vision:2,maxHealth:100,strength:18,range:1,requires:null},archer:{name:"Лучник",symbol:"A",role:"ranged",cost:28,movement:2,vision:2,maxHealth:70,strength:15,range:2,requires:"archery"},worker:{name:"Работник",symbol:"B",role:"worker",cost:20,movement:2,vision:1,maxHealth:45,strength:1,range:0,requires:"craftsmanship"},spearman:{name:"Копейщик",symbol:"S",role:"melee",cost:32,movement:2,vision:2,maxHealth:100,strength:24,range:1,requires:"bronze"},raider:{name:"Налётчик",symbol:"!",role:"melee",cost:0,movement:2,vision:2,maxHealth:80,strength:14,range:1,requires:null}};
+export const TECHS={agriculture:{name:"Земледелие",cost:12,description:"Поселенцы, амбар"},tracking:{name:"Следопытство",cost:12,description:"Разведчики"},craftsmanship:{name:"Ремесло",cost:16,description:"Работники и мастерская"},pottery:{name:"Гончарство",cost:20,requires:["agriculture"],description:"Святилище"},archery:{name:"Стрельба из лука",cost:20,requires:["tracking"],description:"Лучники"},masonry:{name:"Кладка",cost:24,requires:["craftsmanship"],description:"Стены и каменоломня"},bronze:{name:"Бронза",cost:28,requires:["craftsmanship"],description:"Копейщики и казармы"},writing:{name:"Письменность",cost:30,requires:["pottery"],description:"Библиотека; переход в Союз городов"}};
+export const BUILDINGS={granary:{name:"Амбар",cost:24,requires:"agriculture",effect:"+3 пищи",yield:{food:3}},workshop:{name:"Мастерская",cost:28,requires:"craftsmanship",effect:"+3 производства",yield:{production:3}},shrine:{name:"Святилище",cost:26,requires:"pottery",effect:"+2 знаний",yield:{science:2}},walls:{name:"Стены",cost:32,requires:"masonry",effect:"+35 защиты",defence:35},quarry:{name:"Каменоломня",cost:30,requires:"masonry",effect:"+2 производства",yield:{production:2}},barracks:{name:"Казармы",cost:34,requires:"bronze",effect:"новые воины крепче",veteran:10},library:{name:"Библиотека",cost:38,requires:"writing",effect:"+4 знаний",yield:{science:4}}};
+export const IMPROVEMENTS={farm:{name:"Ферма",terrains:["plains"],yield:{food:2}},mine:{name:"Рудник",terrains:["hills"],yield:{production:2}},lumber:{name:"Лесной стан",terrains:["forest"],yield:{production:2}}};
+export const CIVS={player:{name:"Союз Зари",color:"#f0cf7d",human:true},ochre:{name:"Охряные города",color:"#df7655"},river:{name:"Речное царство",color:"#68a9da"},independent:{name:"Вольные племена",color:"#d6d6c8"}};
+export const VICTORY={knowledge:8,cities:4};
