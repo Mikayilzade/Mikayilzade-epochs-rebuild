@@ -38,7 +38,7 @@ export function canMove(state, unit, target) {
   if(target.x<0||target.y<0||target.x>=state.map.width||target.y>=state.map.height) return {ok:false,reason:"За краем карты пути нет."};
   const tile=state.map.tiles[indexOf(target.x,target.y,state.map.width)];
   if(!TERRAIN[tile.terrain].passable) return {ok:false,reason:`${TERRAIN[tile.terrain].name}: местность непроходима.`};
-  if(state.units.some(u=>u.owner!==unit.owner&&u.x===target.x&&u.y===target.y)) return {ok:false,reason:"Клетка занята враждебным отрядом."};
+  if(state.units.some(u=>u.id!==unit.id&&u.x===target.x&&u.y===target.y)) return {ok:false,reason:"Клетка занята другим отрядом."};
   return {ok:true};
 }
 export function moveUnit(state,id,target){const unit=state.units.find(u=>u.id===id);const verdict=canMove(state,unit,target);if(!verdict.ok)return verdict;unit.x=target.x;unit.y=target.y;unit.movement--;reveal(state,target,UNIT_TYPES[unit.type].vision);state.log.unshift(`${UNIT_TYPES[unit.type].name} исследует новую клетку.`);return {ok:true};}
