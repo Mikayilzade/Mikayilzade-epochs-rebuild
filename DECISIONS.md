@@ -19,3 +19,23 @@ A browser implementation is the default because the legacy game and desired phon
 ## 2026-07-30 — Narrative events are subordinate
 
 Historical events may later enrich the simulation, but they cannot become the primary game loop or replace spatial strategy.
+
+## 2026-08-01 — Dependency-free canvas vertical slice
+
+Use browser-native ES modules, Canvas 2D and Node's built-in test runner. This keeps local launch and static deployment reproducible without a package install while preserving a strict boundary between data, pure simulation, persistence/controller and rendering/input.
+
+## 2026-08-01 — Seeded compact world and deterministic threat
+
+The first mission uses a generated 16 × 12 square grid and deterministic random/AI choices. Compact scale makes ten-turn sessions legible on phones and tests reproducible; map dimensions, terrain and balance remain data-driven and replaceable.
+
+## 2026-08-01 — One validated local save schema
+
+Begin with an explicit version-1 JSON envelope in localStorage and reject malformed/unsupported data without mutating the running game. Multiple campaign slots and migrations are postponed rather than coupling the simulation to a premature storage system.
+
+## 2026-08-01 — Bounded autonomous review repair
+
+Keep the existing architecture and close three quality gaps in one repair pass: validate restored campaigns deeply enough that malformed terrain and out-of-bounds entities cannot reach rendering, support genuine two-pointer camera zoom, and make the autonomous raider affect production when it reaches settlement outskirts. Tactical combat remains explicitly out of scope.
+
+## 2026-08-01 — Research unlocks must be playable, not labels
+
+Agriculture and masonry now unlock production-funded buildings rather than merely announcing future content. Buildings are content data, persist in settlement state and contribute to land-derived income. They complete immediately in this compact slice; a production queue can later replace the purchase timing without changing research, settlement or rendering boundaries.

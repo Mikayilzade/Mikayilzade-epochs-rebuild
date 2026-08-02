@@ -2,11 +2,26 @@
 
 This repository is the clean implementation target for rebuilding the existing map strategy `Mikayilzade/Epohi`.
 
+## Играть локально
+
+Нужен Node.js 20 или новее. Зависимости устанавливать не требуется.
+
+```bash
+npm run dev
+```
+
+Откройте `http://127.0.0.1:4173`. Для production-сборки и её проверки:
+
+```bash
+npm run build
+npm run preview
+```
+
+Статические файлы появятся в `dist/`. Проверки: `npm test` и `npm run smoke`.
+
 ## Current status
 
-The repository currently contains the verified production contract and local legacy identity evidence. Product code will be created by the next autonomous Codex mission.
-
-The earlier linear 12-event experiment is not part of `main` and is not the intended game.
+Первый вертикальный срез реализован: генерируемая тайловая карта, туман войны, постоянные отряды, поселения, экономика, исследования с реальными постройками за производство, автономная угроза и локальные сохранения. Это новая модульная реализация, не код закрытого PR и не фиксированный граф регионов.
 
 ## Read order for agents
 
