@@ -1,18 +1,18 @@
 # Verified Current State
 
-Updated: 2026-08-01
+Updated: 2026-08-02
 
 ## Implemented and locally verified
 
 - A new dependency-free browser implementation presents a seeded, generated 16 × 12 tile world as the primary surface.
 - Plains, forests, hills, water and mountains have data-defined yields/passability; some land carries visible resources.
-- Per-tile fog is revealed by persistent scouts and settlers. Orthogonal movement spends role-specific movement points and rejects range, impassable terrain, exhausted movement and enemy occupation.
+- Per-tile fog is revealed by persistent scouts and settlers. Orthogonal movement spends role-specific movement points and rejects range, impassable terrain, exhausted movement and every occupied destination tile, preventing inaccessible unit stacks.
 - The First Hearth settlement has population/development and works local terrain for food, production and knowledge. A settler may found a distant second settlement.
 - Agriculture and masonry form a prerequisite research path with visible unlock messages, tribe → settlement → city status, and production-funded Ambar/Quarry construction whose yields affect later turns.
 - End turn resolves yields, population development, research, autonomous deterministic raider movement and consequential raids, movement refresh and fog.
 - Version 1 JSON saves validate the complete map shape, terrain, resources, entity bounds, identifiers, research prerequisites/progress and building unlock relationships before restoration; missing, malformed and unsupported saves fail safely.
 - Canvas camera supports mouse/touch pan, two-finger pinch and wheel/buttons zoom, whole-map fit and selected-unit refocus. The panels reflow for phone widths.
-- Eleven pure-rule automated tests and the deterministic turn-13 save/reload smoke scenario pass; the smoke path researches Agriculture, spends production on an Ambar, restores it, and observes a raid. Chronicle entries are rendered as text rather than restored HTML. Production output is generated in `dist/`.
+- Twelve pure-rule automated tests and the deterministic turn-13 save/reload smoke scenario pass; the smoke path rejects friendly stacking, researches Agriculture, spends production on an Ambar, restores it, and observes a raid. Chronicle entries are rendered as text rather than restored HTML. Production output is generated in `dist/`.
 
 ## Verified legacy state
 
@@ -47,7 +47,8 @@ Exact evidence and source references are in `SOURCE_AUDIT.md` and `reference/LEG
 - Saves use one local browser slot rather than the legacy multi-slot IndexedDB campaign system.
 - The map size is fixed at 16 × 12 for this slice, though its contents are genuinely seed-generated.
 - Final art, audio, diplomacy and a long multi-era campaign are outside the mission.
+- Automated browser capture was unavailable in the production environment, so a real desktop and narrow-viewport visual pass is still required before merge.
 
 ## Best next player action
 
-Research Agriculture, use the scout to reveal a safe route, lead the settlers at least four cells from First Hearth, establish New Frontier, and watch the red raider's approach while progressing toward Masonry.
+Run the PR branch locally, verify the desktop layout and core interactions, then inspect camera controls at a narrow viewport. After the visual pass, merge PR #4 if no blocker is found.
