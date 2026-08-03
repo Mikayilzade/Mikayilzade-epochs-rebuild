@@ -118,18 +118,20 @@ export function validateGame(game) {
 
   const entityIds = new Set([...game.units, ...game.cities].map(item => item.id));
   if (entityIds.size !== game.units.length + game.cities.length) return false;
-  const selected = [...game.units, ...game.cities].find(item => item.id === game.selected?.id);
-  if (game.selected === null) {
-    if (game.status === "playing" || [...game.units, ...game.cities].some(item =>
-      item.owner === "player")) return false;
-  } else if (!["unit", "city"].includes(game.selected?.kind) || !selected ||
-    selected.owner !== "player" ||
-    (game.selected.kind === "unit") !== game.units.includes(selected)) return false;
+  if (game.selected !== null) {
+    const selected = [...game.units, ...game.cities].find(item => item.id === game.selected?.id);
+    if (!["unit", "city"].includes(game.selected?.kind) || !selected ||
+      selected.owner !== "player" ||
+      (game.selected.kind === "unit") !== game.units.includes(selected)) return false;
+  }
   if (!Array.isArray(game.log) || game.log.some(entry => typeof entry !== "string")) return false;
   if (game.status === "playing" && (game.winner !== null || game.summary !== null)) return false;
   if (game.status !== "playing" && (!CIVS[game.winner] || !game.summary ||
     !integer(game.summary.turn, 1) || !integer(game.summary.cities) ||
-    !integer(game.summary.techs) || !integer(game.summary.battles))) return false;
+    !integer(game.summary.techs) || !integer(game.summary.battles) ||
+    (game.summary.reason !== undefined && typeof game.summary.reason !== "string") ||
+    (game.summary.winnerCities !== undefined && !integer(game.summary.winnerCities)) ||
+    (game.summary.winnerTechs !== undefined && !integer(game.summary.winnerTechs)))) return false;
   return true;
 }
 
