@@ -1,7 +1,249 @@
-import { CIVS, RESOURCES, TERRAIN, UNIT_TYPES } from "../content/config.js";
+import { CIVS, TERRAIN, UNIT_TYPES } from "../content/config.js";
 import { canMove, distance, indexOf } from "../domain/world.js";
 
-const TILE = 52;
+export const TILE = 56;
+
+function roundedRect(ctx, x, y, w, h, r) {
+  const radius = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.arcTo(x + w, y, x + w, y + h, radius);
+  ctx.arcTo(x + w, y + h, x, y + h, radius);
+  ctx.arcTo(x, y + h, x, y, radius);
+  ctx.arcTo(x, y, x + w, y, radius);
+  ctx.closePath();
+}
+
+function drawTerrainPattern(ctx, tile, x, y) {
+  ctx.save();
+  ctx.globalAlpha = .34;
+  ctx.strokeStyle = "#0b1612";
+  ctx.fillStyle = "#10201a";
+  ctx.lineWidth = 1.5;
+  if (tile.terrain === "water") {
+    for (let row = 0; row < 3; row += 1) {
+      ctx.beginPath();
+      ctx.arc(x + 12 + row * 5, y + 15 + row * 12, 8, Math.PI, Math.PI * 2);
+      ctx.arc(x + 34 + row * 3, y + 15 + row * 12, 8, Math.PI, Math.PI * 2);
+      ctx.stroke();
+    }
+  } else if (tile.terrain === "forest") {
+    for (const [dx, dy] of [[14,16],[36,14],[25,34],[44,38]]) {
+      ctx.beginPath();
+      ctx.moveTo(x + dx, y + dy - 7);
+      ctx.lineTo(x + dx - 5, y + dy + 3);
+      ctx.lineTo(x + dx + 5, y + dy + 3);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillRect(x + dx - 1, y + dy + 2, 2, 5);
+    }
+  } else if (tile.terrain === "hills") {
+    ctx.beginPath();
+    ctx.moveTo(x + 5, y + 42);
+    ctx.quadraticCurveTo(x + 18, y + 18, x + 31, y + 42);
+    ctx.quadraticCurveTo(x + 42, y + 26, x + 53, y + 42);
+    ctx.stroke();
+  } else if (tile.terrain === "mountains") {
+    ctx.beginPath();
+    ctx.moveTo(x + 4, y + 47);
+    ctx.lineTo(x + 20, y + 14);
+    ctx.lineTo(x + 29, y + 31);
+    ctx.lineTo(x + 38, y + 10);
+    ctx.lineTo(x + 53, y + 47);
+    ctx.stroke();
+  } else if (tile.terrain === "desert") {
+    ctx.beginPath();
+    ctx.moveTo(x + 5, y + 38);
+    ctx.quadraticCurveTo(x + 18, y + 27, x + 31, y + 38);
+    ctx.quadraticCurveTo(x + 42, y + 45, x + 53, y + 35);
+    ctx.stroke();
+  } else {
+    for (const [dx, dy] of [[13,15],[34,12],[24,34],[45,38]]) {
+      ctx.beginPath();
+      ctx.arc(x + dx, y + dy, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+function drawResource(ctx, resource, x, y) {
+  ctx.save();
+  ctx.translate(x + 44, y + 11);
+  ctx.fillStyle = "#f0d48f";
+  ctx.strokeStyle = "#3b2b19";
+  ctx.lineWidth = 1.5;
+  if (resource === "Медь") {
+    ctx.beginPath();
+    ctx.moveTo(0, -6);
+    ctx.lineTo(6, 0);
+    ctx.lineTo(0, 6);
+    ctx.lineTo(-6, 0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  } else {
+    ctx.beginPath();
+    ctx.arc(0, 0, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-3, -3);
+    ctx.lineTo(-7, -8);
+    ctx.moveTo(3, -3);
+    ctx.lineTo(7, -8);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawImprovement(ctx, improvement, x, y) {
+  ctx.save();
+  ctx.translate(x + 12, y + 44);
+  ctx.strokeStyle = "#fff3c4";
+  ctx.fillStyle = "#fff3c4";
+  ctx.lineWidth = 2;
+  if (improvement === "farm") {
+    for (let i = -5; i <= 5; i += 5) {
+      ctx.beginPath();
+      ctx.moveTo(i, 5);
+      ctx.lineTo(i, -5);
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.moveTo(-7, 0);
+    ctx.lineTo(7, 0);
+    ctx.stroke();
+  } else if (improvement === "mine") {
+    ctx.beginPath();
+    ctx.moveTo(-6, 5);
+    ctx.lineTo(0, -6);
+    ctx.lineTo(6, 5);
+    ctx.stroke();
+    ctx.fillRect(-5, 3, 10, 3);
+  } else {
+    ctx.beginPath();
+    ctx.moveTo(-6, 5);
+    ctx.lineTo(0, -7);
+    ctx.lineTo(6, 5);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fillRect(-1, 4, 2, 4);
+  }
+  ctx.restore();
+}
+
+function drawUnitIcon(ctx, type, cx, cy, scale = 1) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+  ctx.strokeStyle = "#15221d";
+  ctx.fillStyle = "#15221d";
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  if (type === "scout") {
+    ctx.beginPath();
+    ctx.arc(0, 0, 7, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(5, -5);
+    ctx.lineTo(11, -11);
+    ctx.moveTo(11, -11);
+    ctx.lineTo(8, -11);
+    ctx.moveTo(11, -11);
+    ctx.lineTo(11, -8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, 2, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (type === "settler") {
+    ctx.beginPath();
+    ctx.arc(-4, -4, 3, 0, Math.PI * 2);
+    ctx.arc(4, -4, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-9, 8);
+    ctx.quadraticCurveTo(-4, -1, 0, 8);
+    ctx.quadraticCurveTo(4, -1, 9, 8);
+    ctx.stroke();
+  } else if (type === "warrior") {
+    ctx.beginPath();
+    ctx.moveTo(-8, -8);
+    ctx.lineTo(7, 7);
+    ctx.moveTo(-3, 7);
+    ctx.lineTo(8, -4);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(-5, 5, 4, 0, Math.PI * 2);
+    ctx.stroke();
+  } else if (type === "archer") {
+    ctx.beginPath();
+    ctx.arc(-2, 0, 9, -Math.PI / 2, Math.PI / 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(-2, -9);
+    ctx.lineTo(-2, 9);
+    ctx.moveTo(-8, 0);
+    ctx.lineTo(10, 0);
+    ctx.lineTo(6, -3);
+    ctx.moveTo(10, 0);
+    ctx.lineTo(6, 3);
+    ctx.stroke();
+  } else if (type === "worker") {
+    ctx.beginPath();
+    ctx.moveTo(-8, 8);
+    ctx.lineTo(6, -6);
+    ctx.moveTo(2, -10);
+    ctx.lineTo(10, -2);
+    ctx.stroke();
+  } else if (type === "spearman") {
+    ctx.beginPath();
+    ctx.moveTo(-7, 9);
+    ctx.lineTo(6, -7);
+    ctx.lineTo(7, -1);
+    ctx.moveTo(6, -7);
+    ctx.lineTo(0, -6);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(-5, 4, 4, 0, Math.PI * 2);
+    ctx.stroke();
+  } else {
+    ctx.beginPath();
+    ctx.moveTo(-7, -7);
+    ctx.lineTo(7, 7);
+    ctx.moveTo(7, -7);
+    ctx.lineTo(-7, 7);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, 10, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawCityIcon(ctx, city, x, y) {
+  const faction = CIVS[city.owner];
+  ctx.save();
+  ctx.translate(x + 28, y + 28);
+  ctx.fillStyle = faction.color;
+  ctx.strokeStyle = "#17221e";
+  ctx.lineWidth = 2;
+  roundedRect(ctx, -18, -16, 36, 32, 8);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#17221e";
+  ctx.beginPath();
+  ctx.moveTo(-12, 2);
+  ctx.lineTo(0, -9);
+  ctx.lineTo(12, 2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillRect(-10, 2, 20, 11);
+  ctx.fillStyle = faction.color;
+  ctx.fillRect(-3, 6, 6, 7);
+  ctx.restore();
+}
 
 export class MapView {
   constructor(canvas, camera, click, hover = () => {}) {
@@ -13,6 +255,7 @@ export class MapView {
     this.pointers = new Map();
     this.gesture = null;
     this.dragged = false;
+    this.mode = null;
 
     canvas.addEventListener("click", event => {
       if (!this.dragged) click(camera.screenToTile(event.offsetX, event.offsetY, TILE));
@@ -41,7 +284,7 @@ export class MapView {
           y: (points[0].y + points[1].y) / 2
         };
         const separation = Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
-        camera.scale = Math.max(0.35, Math.min(2.5,
+        camera.scale = Math.max(.35, Math.min(2.5,
           this.gesture.scale * separation / this.gesture.separation));
         const ratio = camera.scale / this.gesture.scale;
         camera.x = center.x - (this.gesture.center.x - this.gesture.cameraX) * ratio;
@@ -59,7 +302,7 @@ export class MapView {
     canvas.addEventListener("pointerleave", () => hover(null));
     canvas.addEventListener("wheel", event => {
       event.preventDefault();
-      camera.zoom(event.deltaY < 0 ? 1.12 : 0.89, { x: event.offsetX, y: event.offsetY });
+      camera.zoom(event.deltaY < 0 ? 1.12 : .89, { x: event.offsetX, y: event.offsetY });
       this.draw();
     }, { passive: false });
   }
@@ -94,8 +337,9 @@ export class MapView {
     this.ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
   }
 
-  setState(state) {
+  setState(state, mode = null) {
     this.state = state;
+    this.mode = mode;
     this.draw();
   }
 
@@ -110,13 +354,21 @@ export class MapView {
           city.x === tile.x && city.y === tile.y);
       let color = null;
       if (enemy && definition.strength > 1 && distance(selected, enemy) <= definition.range) {
-        color = "#ef625f66";
+        color = this.mode === "attack" || !this.mode ? "#d95f526e" : null;
       } else if (distance(selected, tile) === 1) {
-        color = canMove(this.state, selected, tile).ok ? "#73d99355" : "#a7b0b02b";
+        const legal = canMove(this.state, selected, tile).ok;
+        if (this.mode === "improve") {
+          const improvement = tile.owner === "player" && !tile.improvement &&
+            ["plains", "hills", "forest"].includes(tile.terrain);
+          color = improvement ? "#e8bd6860" : "#87918d22";
+        } else if (this.mode !== "attack") {
+          color = legal ? "#78b68b55" : "#9ca7a322";
+        }
       }
       if (color) {
         ctx.fillStyle = color;
-        ctx.fillRect(tile.x * TILE + 4, tile.y * TILE + 4, TILE - 8, TILE - 8);
+        roundedRect(ctx, tile.x * TILE + 4, tile.y * TILE + 4, TILE - 8, TILE - 8, 8);
+        ctx.fill();
       }
     }
   }
@@ -133,64 +385,69 @@ export class MapView {
     for (const tile of this.state.map.tiles) {
       const x = tile.x * TILE;
       const y = tile.y * TILE;
-      ctx.fillStyle = tile.revealed ? TERRAIN[tile.terrain].color : "#101a22";
+      ctx.fillStyle = tile.revealed ? TERRAIN[tile.terrain].color : "#0a1512";
       ctx.fillRect(x, y, TILE, TILE);
-      ctx.strokeStyle = tile.owner && tile.revealed ? CIVS[tile.owner].color : "#ffffff18";
+      if (tile.revealed) drawTerrainPattern(ctx, tile, x, y);
+      ctx.strokeStyle = tile.owner && tile.revealed ? CIVS[tile.owner].color : "#ffffff16";
       ctx.lineWidth = tile.owner && tile.revealed ? 3 : 1;
       ctx.strokeRect(x + 1, y + 1, TILE - 2, TILE - 2);
       if (!tile.revealed) continue;
-      if (tile.resource) {
-        ctx.fillStyle = "#ffe39a";
-        ctx.font = "10px sans-serif";
-        ctx.fillText(RESOURCES[tile.resource]?.name ?? tile.resource, x + 3, y + 49);
-      }
-      if (tile.improvement) {
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 13px sans-serif";
-        ctx.fillText("+", x + 39, y + 14);
-      }
+      if (tile.resource) drawResource(ctx, tile.resource, x, y);
+      if (tile.improvement) drawImprovement(ctx, tile.improvement, x, y);
     }
 
     const selectedUnit = this.state.units.find(unit => unit.id === this.state.selected?.id);
     this.drawActionOverlay(ctx, selectedUnit);
 
     for (const city of this.state.cities) {
-      if (!this.state.map.tiles[indexOf(city.x, city.y, this.state.map.width)].revealed) continue;
-      ctx.fillStyle = CIVS[city.owner].color;
-      ctx.fillRect(city.x * TILE + 9, city.y * TILE + 9, 34, 34);
-      ctx.fillStyle = "#17202a";
-      ctx.font = "bold 12px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(`⌂${city.population}`, (city.x + 0.5) * TILE, (city.y + 0.5) * TILE + 4);
+      const tile = this.state.map.tiles[indexOf(city.x, city.y, this.state.map.width)];
+      if (!tile.revealed) continue;
+      const x = city.x * TILE;
+      const y = city.y * TILE;
+      drawCityIcon(ctx, city, x, y);
       if (city.id === this.state.selected?.id) {
-        ctx.strokeStyle = "#fff";
+        ctx.strokeStyle = "#fff4c5";
         ctx.lineWidth = 3;
-        ctx.strokeRect(city.x * TILE + 5, city.y * TILE + 5, 42, 42);
+        roundedRect(ctx, x + 3, y + 3, TILE - 6, TILE - 6, 10);
+        ctx.stroke();
+      }
+      if (this.camera.scale > .72) {
+        const label = `${city.name} · ${city.population}`;
+        ctx.font = "bold 10px sans-serif";
+        const width = ctx.measureText(label).width + 10;
+        ctx.fillStyle = "rgba(10,20,17,.88)";
+        roundedRect(ctx, x + TILE / 2 - width / 2, y - 13, width, 15, 5);
+        ctx.fill();
+        ctx.fillStyle = "#f3e7c8";
+        ctx.textAlign = "center";
+        ctx.fillText(label, x + TILE / 2, y - 2);
       }
     }
 
     for (const unit of this.state.units) {
-      if (!this.state.map.tiles[indexOf(unit.x, unit.y, this.state.map.width)].revealed) continue;
+      const tile = this.state.map.tiles[indexOf(unit.x, unit.y, this.state.map.width)];
+      if (!tile.revealed) continue;
+      const cx = (unit.x + .5) * TILE;
+      const cy = (unit.y + .5) * TILE;
       ctx.beginPath();
-      ctx.arc((unit.x + 0.5) * TILE, (unit.y + 0.5) * TILE, 15, 0, Math.PI * 2);
+      ctx.arc(cx, cy, 17, 0, Math.PI * 2);
       ctx.fillStyle = CIVS[unit.owner].color;
       ctx.fill();
-      ctx.fillStyle = "#17202a";
-      ctx.font = "bold 14px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(UNIT_TYPES[unit.type].symbol,
-        (unit.x + 0.5) * TILE, (unit.y + 0.5) * TILE + 5);
-      if (unit.id === this.state.selected?.id) {
-        ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 3;
-        ctx.stroke();
-      }
-      ctx.fillStyle = "#311";
-      ctx.fillRect(unit.x * TILE + 7, unit.y * TILE + 44, 38, 4);
-      ctx.fillStyle = "#65c778";
-      ctx.fillRect(unit.x * TILE + 7, unit.y * TILE + 44,
-        38 * unit.health / (UNIT_TYPES[unit.type].maxHealth + 10), 4);
+      ctx.strokeStyle = unit.id === this.state.selected?.id ? "#fff4c5" : "#1a2823";
+      ctx.lineWidth = unit.id === this.state.selected?.id ? 4 : 2;
+      ctx.stroke();
+      drawUnitIcon(ctx, unit.type, cx, cy, .82);
+
+      const max = UNIT_TYPES[unit.type].maxHealth;
+      ctx.fillStyle = "#3b1717";
+      roundedRect(ctx, unit.x * TILE + 8, unit.y * TILE + 46, 40, 5, 3);
+      ctx.fill();
+      ctx.fillStyle = unit.health / max > .45 ? "#75bd84" : "#d66e61";
+      roundedRect(ctx, unit.x * TILE + 8, unit.y * TILE + 46,
+        40 * Math.max(0, unit.health) / max, 5, 3);
+      ctx.fill();
     }
+
     ctx.restore();
   }
 }
