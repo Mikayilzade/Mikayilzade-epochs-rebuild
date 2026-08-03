@@ -1,50 +1,77 @@
-# Active Mission M1R — First Ten Minutes Human Experience Recovery
+# Active Recovery Mission M1R — First Ten Minutes
 
-Status: **active**
+Status: **implemented; focused Human Product Gate re-test pending**
 
-This mission supersedes the premature Ancient World Alpha 0.2 acceptance attempt in draft PR #7.
+## Why this mission exists
 
-## One outcome
+The M1 engineering branch implemented many 4X systems and passed automated simulation checks, but a real player still experienced it as a constrained technical demo. Human usability therefore blocks the Ancient World Alpha claim.
 
-Make the existing ancient-world technical foundation understandable and meaningfully interactive to a real player during the first ten minutes.
+This recovery mission preserves the simulation foundation and repairs one coherent product slice: the first ten minutes of map interaction, city management, unit control and outcome understanding.
 
-Do not add diplomacy, another era, more content counts or another simulated campaign. Preserve the working systems and repair the human experience around them.
+## Required outcome
 
-## Required experience contracts
+Without reading repository instructions, a player must be able to:
 
-### Capital city
+1. identify the capital and initial unit roles;
+2. inspect the map safely without issuing accidental orders;
+3. move units diagonally and select farther reachable destinations;
+4. understand automatic route movement and remaining movement points;
+5. open and manage a city;
+6. compare production choices and understand technology locks;
+7. choose research and understand its unlocks;
+8. understand worker, settler, melee and ranged actions;
+9. inspect enemy city health and defence;
+10. understand the shared victory condition and the exact cause of a terminal result.
 
-The player can identify it, select it from map or roster, understand population/growth/yields/defence, inspect buildings and current queue, compare production choices, commit a project and observe progress.
+## Interaction contract
 
-### Scout
+- Ordinary tile clicks inspect only.
+- Movement, attack and improvement require an explicit action mode.
+- Selection can be cleared visibly and through common cancel controls.
+- Eight-direction movement is supported.
+- Clicking a farther reachable destination uses pathfinding and spends only available movement.
+- Ranged attacks use square/Chebyshev distance so offset targets behave as players expect on a square grid.
+- City and enemy inspection expose health, armour, ownership and relevant combat information.
 
-The player understands that it explores, sees movement remaining and legal destinations, moves it, reveals terrain and observes the consequence.
+## Visual contract
 
-### Settler
+Current browser-native vector visuals are functional readability assets, not final commercial art. They must distinguish terrain, cities, factions and unit roles at normal zoom. Final illustration, animation, effects and audio remain later roadmap work.
 
-The player understands the founding action, minimum distance and invalid-site feedback before walking many turns in the wrong direction.
+## Outcome contract
 
-### Warrior / combat unit
+- The world panel shows every civilization's progress toward the same objective.
+- Victory or defeat states the exact triggering condition.
+- The terminal screen shows winner city/technology totals and recent final events.
+- A city recapture and a rival victory in the same turn must be causally understandable.
 
-The player understands strength, health, range, legal attack targets, expected risk, waiting/defending and the distinction between movement and attack.
+## Required evidence
 
-### Worker
+- JavaScript syntax checks.
+- Full domain/controller tests.
+- Regression tests for diagonal pathing, multi-cell movement, safe deselection, offset archer range and causal defeat summary.
+- Command-level terminal campaign smoke with save/reload.
+- Production build.
+- Real-browser re-test recorded in `PLAYTEST.md`.
 
-The player understands which owned adjacent tiles can be improved and what farm/mine/lumber improvements change.
+## Current implementation evidence
 
-## Required visible evidence
+Local mirror reconstructed from the active branch on 2026-08-03:
 
-- opening state;
-- selected scout with actions;
-- selected/open capital with production options;
-- research choice/progress;
-- objective tracker after at least one completed step;
-- real browser first-ten-minute notes.
+- syntax checks passed;
+- `node --test`: 24/24 passed;
+- command-level smoke reached player victory on turn 47 with all required evidence;
+- production build completed;
+- GitHub Actions were not run.
 
-## Maturity rule
+## Acceptance
 
-Until a real human passes the gate, report:
+M1R passes only after the repository owner verifies through the permanent GitHub Pages preview that:
 
-`technical prototype — human gate pending`
+- diagonal and multi-cell movement work naturally;
+- map inspection cannot spend movement accidentally;
+- deselection and cancellation are clear;
+- archer offset range matches expectation;
+- enemy city HP/armour are visible;
+- defeat and victory causality are understandable.
 
-A command-level win, green tests or a convincing PR report cannot promote the build to alpha.
+Do not begin M2 or claim Alpha 0.2 until this focused Human Product Gate passes.
