@@ -1,6 +1,6 @@
 # Verified Current State
 
-Updated: 2026-08-03 — **experience repair implemented; engineering checks pass; Human Product Gate pending re-test**
+Updated: 2026-08-03 — **second human playtest completed; focused interaction repair implemented; Human Product Gate pending re-test**
 
 ## Engineering foundation preserved
 
@@ -9,55 +9,61 @@ Updated: 2026-08-03 — **experience repair implemented; engineering checks pass
 - Cities with population, growth, health/defence, worked territory, buildings and multi-turn production.
 - Scout, settler, warrior, archer, worker and spearman definitions.
 - Research, combat, capture, victory/defeat and schema-2 persistence.
-- Command-level terminal campaign evidence from the superseded PR #7 branch.
+- Command-level terminal campaign evidence.
 
-## Human Product Gate result for draft PR #7
+## Human Product Gate history
+
+### Draft PR #7
 
 Result: **FAIL**.
 
-A real Chrome desktop playtest found:
+The first real Chrome playtest found unexplained letter tokens, weakly discoverable actions, decorative-feeling cities and no clear action → consequence loop.
 
-- map units were perceived as unexplained letters;
-- unit roles and actions were not discoverable;
-- city interaction did not feel like opening and managing a city;
-- the interface exposed values but did not form a clear decision flow;
-- the product felt severely limited despite extensive systems in code.
+### Draft PR #8 — first experience-repair test
 
-Therefore PR #7 is not an accepted Ancient World Alpha 0.2 release.
+Result: **meaningful improvement, not yet a pass**.
 
-## Experience repair implemented
+The player reported:
 
-Branch `agent/first-ten-minutes` now adds:
+- city production and science dependencies were understandable and enjoyable;
+- archers felt useful;
+- the campaign reached a real terminal result;
+- movement and inspection remained unsafe or too restricted;
+- defeat causality and enemy city combat state were unclear.
 
-- browser-native vector silhouettes for unit roles;
-- distinct city architecture symbols and labels;
-- terrain texture/pattern cues, resource marks and improvement marks;
-- an owned-object roster with direct selection and camera focus;
-- explicit move, attack, found-city, improve-land and wait/defend actions;
-- role explanations, health/movement/combat values and blocked-action feedback;
-- a city-management panel with growth, yields, defence, buildings and independent production;
-- production cost, approximate turns, effect and progress;
-- research prerequisites, active progress and unlock descriptions;
-- a dynamic first-steps objective tracker;
-- richer terrain/entity hover information;
-- a real Human Product Gate checklist in `PLAYTEST.md`.
+## Focused interaction repair now implemented
+
+- eight-direction movement;
+- automatic pathfinding to farther reachable tiles;
+- partial route movement when a destination exceeds current movement points;
+- explicit action modes so ordinary map clicks inspect rather than issue orders;
+- visible deselection plus repeated-click, Escape and right-click cancellation;
+- square/Chebyshev ranged combat, matching the player's expected two-by-one archer range;
+- map-level enemy city health bars and HP/armour labels;
+- detailed enemy unit/city inspection messages;
+- required technology named on locked production projects;
+- visible progress of all civilizations toward the shared victory objective;
+- terminal summaries with exact cause, winner city/technology totals and final events;
+- worked-tile trimming after starvation to keep save state valid.
 
 ## Engineering verification
 
-A local mirror reconstructed from the actual GitHub branch was tested on 2026-08-03:
+Local mirror reconstructed from the actual branch files on 2026-08-03:
 
 - JavaScript syntax checks: pass for main UI, map, controller, world, simulation and persistence modules;
-- `npm test`: **19/19 passed**;
-- `npm run build`: pass; static `dist/` created;
-- local static server: pass;
-- HTTP retrieval: pass for `/`, `/src/main.js` and `/src/ui/map.js`.
+- `node --test`: **24/24 passed**;
+- command-level campaign smoke: player victory on turn **47** with all required evidence;
+- production build: pass; static `dist/` created;
+- GitHub Actions were not run.
 
-GitHub Actions were not run.
+## Graphics maturity
+
+Current browser-native vector assets are functional readability art. Final character art, animation, effects, audio and commercial visual polish are intentionally later work, but symbols must remain distinguishable enough to pass the current Human Product Gate.
 
 ## Current maturity
 
-`technical prototype — human gate pending`
+`technical prototype — focused human re-test pending`
 
 ## Current action
 
-Open one draft PR superseding PR #7, then run a new real-browser first-ten-minute playtest. Do not merge or claim alpha until the Human Product Gate records a pass.
+Publish the latest `agent/first-ten-minutes` head to the permanent `preview` branch, then re-test diagonal/path movement, safe inspection, deselection, archer range, enemy city status and exact terminal reasoning. Do not merge or claim alpha until the Human Product Gate records a pass.
