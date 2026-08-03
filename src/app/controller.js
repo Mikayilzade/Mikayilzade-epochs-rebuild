@@ -50,6 +50,13 @@ export class Controller {
     return { ok: true };
   }
 
+  clearSelection() {
+    if (!this.state) return { ok: false, reason: "Нет активной кампании." };
+    this.state.selected = null;
+    this.render(this.state, "Выбор снят. Клики по карте теперь только показывают информацию.");
+    return { ok: true };
+  }
+
   waitUnit(id) {
     const unit = this.state.units.find(item => item.id === id);
     if (!unit || unit.owner !== "player") {
@@ -61,7 +68,7 @@ export class Controller {
     unit.movement = 0;
     unit.fortified = UNIT_TYPES[unit.type].strength > 1;
     this.state.log.unshift(`${UNIT_TYPES[unit.type].name} завершает действия${unit.fortified ? " и готовится к обороне" : ""}.`);
-    return { ok: true };
+    return { ok: true, message: unit.fortified ? "Отряд укрепился и завершил действия." : "Отряд завершил действия." };
   }
 
   command(type, payload = {}) {
@@ -77,7 +84,7 @@ export class Controller {
     }
     if (type === "wait") result = this.waitUnit(selectedId);
     if (type === "end") result = endTurn(this.state);
-    this.render(this.state, result.ok ? "" : result.reason);
+    this.render(this.state, result.ok ? result.message || "" : result.reason);
     return result;
   }
 }
