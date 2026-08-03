@@ -9,7 +9,7 @@ import {
   VICTORY
 } from "./content/config.js";
 import { cityYield, civ, combatPreview, era } from "./domain/simulation.js";
-import { distance, indexOf } from "./domain/world.js";
+import { indexOf, rangeDistance } from "./domain/world.js";
 import { Camera } from "./ui/camera.js";
 import { MapView, TILE } from "./ui/map.js";
 
@@ -70,12 +70,48 @@ function selectEntity(kind, id, focus = false) {
   render(controller.state);
 }
 
+function clearSelection() {
+  actionMode = null;
+  controller.clearSelection();
+  render(controller.state);
+}
+
 function issue(type, payload) {
   const result = controller.command(type, payload);
   if (result.ok && type !== "move") actionMode = null;
   if (result.ok && type === "move" && selectedUnit(controller.state)?.movement < 1) actionMode = null;
   render(controller.state);
   return result;
+}
+
+function tileDescription(state, position) {
+  const tile = state.map.tiles[indexOf(position.x, position.y, state.map.width)];
+  if (!tile.revealed) return "Неизведанная земля — подведите разведчика ближе.";
+  const terrain = TERRAIN[tile.terrain];
+  const parts = [
+    `${terrain.name}: ${terrain.passable ? "проходимо" : "непроходимо"}`,
+    `пища ${terrain.yield.food || 0}`,
+    `производство ${terrain.yield.production || 0}`,
+    `знания ${terrain.yield.science || 0}`
+  ];
+  const unit = state.units.find(item => item.x === position.x && item.y === position.y);
+  const city = state.cities.find(item => item.x === position.x && item.y === position.y);
+  if (tile.resource) parts.push(`ресурс: ${tile.resource}`);
+  if (tile.improvement) parts.push(`улучшение: ${IMPROVEMENTS[tile.improvement].name}`);
+  if (tile.owner) parts.push(`земля: ${CIVS[tile.owner].name}`);
+  if (city) {
+    parts.push(`город: ${city.name}`);
+    parts.push(`население ${city.population}`);
+    parts.push(`здоровье ${city.health}/${city.maxHealth}`);
+    parts.push(`броня ${city.defence}`);
+  }
+  if (unit) {
+    const definition = UNIT_TYPES[unit.type];
+    parts.push(`отряд: ${definition.name}`);
+    parts.push(`здоровье ${unit.health}/${definition.maxHealth}`);
+    parts.push(`сила ${definition.strength}`);
+  }
+  return parts.join(" · ");
 }
 
 function onTile(position) {
@@ -91,59 +127,74 @@ function onTile(position) {
 
   if (ownUnit && ownCity) {
     if (state.selected?.id === ownUnit.id) selectEntity("city", ownCity.id);
+    else if (state.selected?.id === ownCity.id) clearSelection();
     else selectEntity("unit", ownUnit.id);
     return;
   }
   if (ownCity) {
-    selectEntity("city", ownCity.id);
+    if (state.selected?.id === ownCity.id) clearSelection();
+    else selectEntity("city", ownCity.id);
     return;
   }
   if (ownUnit) {
-    selectEntity("unit", ownUnit.id);
+    if (state.selected?.id === ownUnit.id) clearSelection();
+    else selectEntity("unit", ownUnit.id);
     return;
   }
 
-  if (unit && selected) {
-    if (unit.owner === "player") return;
-    const definition = UNIT_TYPES[selected.type];
-    if (!definition.strength || definition.strength <= 1) {
-      showMessage("Этот отряд не предназначен для боя.");
+  if (unit && unit.owner !== "player") {
+    const definition = UNIT_TYPES[unit.type];
+    if (actionMode !== "attack" || !selected) {
+      showMessage(`${CIVS[unit.owner].name}: ${definition.name}, здоровье ${unit.health}/${definition.maxHealth}, сила ${definition.strength}, дальность ${definition.range}. Для атаки выберите свой боевой отряд и нажмите «Атаковать».`);
+      return;
+    }
+    if (rangeDistance(selected, unit) > UNIT_TYPES[selected.type].range) {
+      showMessage(`Цель вне дальности (${UNIT_TYPES[selected.type].range}).`);
       return;
     }
     const preview = combatPreview(state, selected, unit);
-    if (confirm(`Атаковать: ${UNIT_TYPES[unit.type].name}?\nВаш урон: ${preview.damage}. Ответный урон: ${preview.retaliation}.`)) {
+    if (confirm(`Атаковать: ${definition.name}?\nВаш урон: ${preview.damage}. Ответный урон: ${preview.retaliation}.`)) {
       issue("attack", { id: unit.id });
     }
     return;
   }
 
-  if (city && selected) {
-    if (city.owner === "player") return;
+  if (city && city.owner !== "player") {
+    if (actionMode !== "attack" || !selected) {
+      showMessage(`${city.name} — ${CIVS[city.owner].name}. Здоровье ${city.health}/${city.maxHealth}, броня ${city.defence}, население ${city.population}. Для штурма выберите боевой отряд и нажмите «Атаковать».`);
+      return;
+    }
     const definition = UNIT_TYPES[selected.type];
-    if (distance(selected, city) > definition.range) {
+    if (rangeDistance(selected, city) > definition.range) {
       showMessage(`Город вне дальности атаки (${definition.range}).`);
       return;
     }
     const preview = combatPreview(state, selected, city);
-    if (confirm(`Штурмовать ${city.name}?\nОжидаемый урон: ${preview.damage}. Ответный урон: ${preview.retaliation}.`)) {
+    if (confirm(`Штурмовать ${city.name}?\nЗдоровье города: ${city.health}/${city.maxHealth}. Броня: ${city.defence}.\nОжидаемый урон: ${preview.damage}. Ответный урон: ${preview.retaliation}.`)) {
       issue("attack", { id: city.id });
     }
     return;
   }
 
-  if (!selected) return;
+  if (!selected) {
+    showMessage(tileDescription(state, position));
+    return;
+  }
+
   const tileIndex = indexOf(position.x, position.y, state.map.width);
-  const tile = state.map.tiles[tileIndex];
   if (actionMode === "attack") {
-    showMessage("Красным выделены доступные цели атаки.");
+    showMessage("Красным выделены доступные цели атаки. Пустая клетка не расходует действие.");
     return;
   }
   if (actionMode === "improve") {
     issue("improve", { index: tileIndex });
     return;
   }
-  if (!tile.revealed && actionMode !== "move") actionMode = "move";
-  issue("move", position);
+  if (actionMode === "move") {
+    issue("move", position);
+    return;
+  }
+  showMessage(`${tileDescription(state, position)} Ничего не потрачено: для движения сначала нажмите «Идти».`);
 }
 
 function onHover(position) {
@@ -154,31 +205,23 @@ function onHover(position) {
     tip.textContent = "";
     return;
   }
-  const tile = state.map.tiles[indexOf(position.x, position.y, state.map.width)];
-  if (!tile.revealed) {
-    tip.textContent = "Неизведанная земля — отправьте разведчика ближе.";
-    return;
-  }
-  const terrain = TERRAIN[tile.terrain];
-  const parts = [
-    `${terrain.name}: ${terrain.passable ? "проходимо" : "непроходимо"}`,
-    `пища ${terrain.yield.food || 0}`,
-    `производство ${terrain.yield.production || 0}`,
-    `знания ${terrain.yield.science || 0}`
-  ];
-  const unit = state.units.find(item => item.x === position.x && item.y === position.y);
-  const city = state.cities.find(item => item.x === position.x && item.y === position.y);
-  if (tile.resource) parts.push(`ресурс: ${tile.resource}`);
-  if (tile.improvement) parts.push(`улучшение: ${IMPROVEMENTS[tile.improvement].name}`);
-  if (tile.owner) parts.push(`земля: ${CIVS[tile.owner].name}`);
-  if (city) parts.push(`город: ${city.name}, население ${city.population}`);
-  if (unit) parts.push(`отряд: ${UNIT_TYPES[unit.type].name}, здоровье ${unit.health}`);
-  tip.textContent = parts.join(" · ");
+  tip.textContent = tileDescription(state, position);
 }
 
 function meter(value, maximum, color = "#78b68b") {
   const percent = Math.max(0, Math.min(100, maximum ? value / maximum * 100 : 0));
   return `<div class="meter" style="--meter:${color}"><i style="width:${percent}%"></i></div>`;
+}
+
+function unitPurpose(role) {
+  const purposes = {
+    recon: "Разведчик открывает туман быстрее других. Избегайте боя и ищите хорошие земли для второго города.",
+    settler: "Поселенцы создают новый город и исчезают после основания. Между городами должно быть не менее четырёх клеток.",
+    melee: "Ближний отряд получает ответный урон, но только он может захватывать город после разрушения защиты.",
+    ranged: "Дальний отряд использует квадратную дальность: цель на две клетки вниз и одну в сторону считается расстоянием 2. На расстоянии больше 1 ответного урона нет.",
+    worker: "Работник усиливает контролируемые клетки: равнина становится фермой, холмы — рудником, лес — лесным станом."
+  };
+  return purposes[role] || "У отряда есть собственная роль в развитии и защите державы.";
 }
 
 function unitPanel(state, unit) {
@@ -187,12 +230,12 @@ function unitPanel(state, unit) {
   const canFight = definition.strength > 1;
   const healthColor = unit.health / definition.maxHealth > .45 ? "#78b68b" : "#d86f63";
   const modeText = actionMode === "move"
-    ? "Выберите соседнюю зелёную клетку."
+    ? `Выберите любую достижимую зелёную клетку. Отряд сам построит путь и пройдёт до ${unit.movement} клеток.`
     : actionMode === "attack"
       ? "Выберите красную цель атаки."
       : actionMode === "improve"
         ? "Выберите соседнюю золотую клетку своей территории."
-        : "Выберите действие или нажмите доступную клетку на карте.";
+        : "Клик по обычной клетке безопасен. Сначала выберите действие.";
 
   return `
     <div class="entity-hero">
@@ -211,27 +254,17 @@ function unitPanel(state, unit) {
     ${meter(unit.health, definition.maxHealth, healthColor)}
     <div class="action-grid">
       <button data-mode="move" class="${actionMode === "move" ? "active" : ""}" ${unit.movement < 1 ? "disabled" : ""}>
-        <b>Идти</b><small>соседняя зелёная клетка</small>
+        <b>Идти</b><small>диагонали разрешены, путь строится автоматически</small>
       </button>
       ${canFight ? `<button data-mode="attack" class="${actionMode === "attack" ? "active" : ""}" ${unit.movement < 1 ? "disabled" : ""}><b>Атаковать</b><small>красная цель в дальности</small></button>` : ""}
       ${definition.role === "settler" ? '<button data-action="found"><b>Основать город</b><small>нужна свободная земля вдали от городов</small></button>' : ""}
       ${definition.role === "worker" ? `<button data-mode="improve" class="${actionMode === "improve" ? "active" : ""}" ${unit.movement < 1 ? "disabled" : ""}><b>Улучшить землю</b><small>ферма, рудник или лесной стан</small></button>` : ""}
       <button data-action="wait" ${unit.movement < 1 ? "disabled" : ""}><b>Ждать</b><small>завершить действия отряда</small></button>
       <button data-action="focus"><b>Показать на карте</b><small>центрировать камеру</small></button>
+      <button data-action="deselect"><b>Снять выбор</b><small>клики по карте ничего не потратят</small></button>
     </div>
-    <p class="rule-note">${unitPurpose(definition.role)}</p>
+    <p class="rule-note">${unitPurpose(definition.role)} Нажмите Esc или правую кнопку мыши, чтобы отменить режим или снять выбор.</p>
   `;
-}
-
-function unitPurpose(role) {
-  const purposes = {
-    recon: "Разведчик открывает туман быстрее других. Избегайте боя и ищите хорошие земли для второго города.",
-    settler: "Поселенцы создают новый город и исчезают после основания. Между городами должно быть не менее четырёх клеток.",
-    melee: "Ближний отряд получает ответный урон, но только он может захватывать город после разрушения защиты.",
-    ranged: "Дальний отряд атакует с расстояния и не получает ответный урон, пока враг не стоит рядом.",
-    worker: "Работник усиливает контролируемые клетки: равнина становится фермой, холмы — рудником, лес — лесным станом."
-  };
-  return purposes[role] || "У отряда есть собственная роль в развитии и защите державы.";
 }
 
 function cityPanel(state, city) {
@@ -280,15 +313,18 @@ function cityPanel(state, city) {
         const duplicate = kind === "building" && city.buildings.includes(id);
         const active = queue?.kind === kind && queue?.id === id;
         const projectTurns = Math.ceil(definition.cost / Math.max(1, output.production));
+        const requirement = locked ? ` · 🔒 требует «${TECHS[definition.requires]?.name || definition.requires}»` : "";
+        const duplicateText = duplicate ? " · уже построено" : "";
         return `<button data-produce="${kind}:${id}" ${locked || duplicate ? "disabled" : ""} class="${active ? "active" : ""}">
           <b>${kind === "unit" ? UNIT_ICONS[id] || "◆" : "▦"} ${escapeHtml(definition.name)}</b>
-          <small>${definition.cost} производства · ≈ ${projectTurns} ход. · ${escapeHtml(definition.effect || ROLE_LABELS[definition.role] || "")}</small>
+          <small>${definition.cost} производства · ≈ ${projectTurns} ход. · ${escapeHtml(definition.effect || ROLE_LABELS[definition.role] || "")}${escapeHtml(requirement)}${escapeHtml(duplicateText)}</small>
         </button>`;
       }).join("")}
     </div>
     <div class="action-grid">
       <button data-action="focus"><b>Показать город</b><small>центрировать камеру</small></button>
       <button data-action="next-city"><b>Следующий город</b><small>переключить управление</small></button>
+      <button data-action="deselect"><b>Снять выбор</b><small>осматривать карту без действий</small></button>
     </div>
     <p class="rule-note">Смена проекта обнуляет накопленный прогресс. Каждый город имеет собственную независимую очередь.</p>
   `;
@@ -299,7 +335,7 @@ function objectPanel(state) {
   const city = selectedCity(state);
   if (unit) return unitPanel(state, unit);
   if (city) return cityPanel(state, city);
-  return `<div class="entity-hero"><div class="entity-emblem">?</div><div><h2>Ничего не выбрано</h2><p>Нажмите свой город или отряд на карте либо выберите объект в списке державы.</p></div></div>`;
+  return `<div class="entity-hero"><div class="entity-emblem">?</div><div><h2>Ничего не выбрано</h2><p>Клики по клеткам теперь только показывают информацию. Выберите свой город или отряд, когда захотите отдать приказ.</p></div></div>`;
 }
 
 function researchPanel(state) {
@@ -315,7 +351,7 @@ function researchPanel(state) {
       const progress = active ? research.progress : 0;
       return `<div class="tech">
         <div class="tech-head"><b>${completed ? "✓ " : active ? "◉ " : locked ? "🔒 " : ""}${escapeHtml(technology.name)}</b><span>${technology.cost} ✦</span></div>
-        <small>${escapeHtml(technology.description)}${technology.requires?.length ? ` · требует: ${technology.requires.map(req => TECHS[req].name).join(", ")}` : ""}</small>
+        <small>${escapeHtml(technology.description)}${technology.requires?.length ? ` · требует: ${technology.requires.map(required => TECHS[required].name).join(", ")}` : ""}</small>
         ${active ? meter(progress, technology.cost, "#7aa9d8") : ""}
         ${!completed && !active ? `<button data-tech="${id}" ${locked || research.active ? "disabled" : ""}>${locked ? "Сначала откройте условие" : research.active ? "Уже идёт другое исследование" : "Начать исследование"}</button>` : ""}
       </div>`;
@@ -329,17 +365,20 @@ function worldPanel(state) {
   return `
     <p class="eyebrow">ЦЕЛЬ КАМПАНИИ</p>
     <h2>Путь к Союзу городов</h2>
-    <p class="lead">Для победы контролируйте ${VICTORY.cities} города и откройте ${VICTORY.knowledge} знаний. Потеря всех городов и поселенцев означает поражение.</p>
+    <p class="lead">Любая цивилизация побеждает сразу в конце хода, когда одновременно контролирует ${VICTORY.cities} города и открывает ${VICTORY.knowledge} знаний. Потеря всех ваших городов и поселенцев также означает поражение.</p>
     <div class="objective-list">
       <div class="objective-row ${playerCities >= VICTORY.cities ? "done" : ""}"><strong>${playerCities}/${VICTORY.cities}</strong><span>городов под вашим контролем</span></div>
       <div class="objective-row ${player.research.completed.length >= VICTORY.knowledge ? "done" : ""}"><strong>${player.research.completed.length}/${VICTORY.knowledge}</strong><span>открытых древних знаний</span></div>
     </div>
     <h3>Народы мира</h3>
-    ${state.civilizations.filter(item => item.id !== "independent").map(item => `
-      <div class="civ-card">
-        <div class="civ-head"><b><i style="background:${item.color}"></i>${escapeHtml(item.name)}</b><span>${state.cities.filter(city => city.owner === item.id).length} гор.</span></div>
-        <small>${item.research.completed.length} знаний · ${state.units.filter(unit => unit.owner === item.id).length} отрядов</small>
-      </div>`).join("")}
+    ${state.civilizations.filter(item => item.id !== "independent").map(item => {
+      const cityCount = state.cities.filter(city => city.owner === item.id).length;
+      const technologyCount = item.research.completed.length;
+      return `<div class="civ-card">
+        <div class="civ-head"><b><i style="background:${item.color}"></i>${escapeHtml(item.name)}</b><span>${cityCount}/${VICTORY.cities} гор.</span></div>
+        <small>${technologyCount}/${VICTORY.knowledge} знаний · ${state.units.filter(unit => unit.owner === item.id).length} отрядов${cityCount >= VICTORY.cities && technologyCount >= VICTORY.knowledge ? " · цель достигнута" : ""}</small>
+      </div>`;
+    }).join("")}
     <div class="civ-card"><div class="civ-head"><b><i style="background:${CIVS.independent.color}"></i>Вольные племена</b><span>${state.units.filter(unit => unit.owner === "independent").length}</span></div><small>Независимые налётчики воюют со всеми державами.</small></div>
   `;
 }
@@ -349,14 +388,14 @@ function helpPanel() {
     <p class="eyebrow">ПЕРВЫЕ ДЕСЯТЬ МИНУТ</p>
     <h2>Как начать</h2>
     <div class="objective-list">
-      <div class="objective-row"><strong>1</strong><span>Выберите разведчика 🧭 и нажмите соседнюю зелёную клетку.</span></div>
-      <div class="objective-row"><strong>2</strong><span>Откройте город Заря 🏛 и назначьте производство.</span></div>
+      <div class="objective-row"><strong>1</strong><span>Выберите разведчика 🧭, нажмите «Идти», затем любую зелёную клетку. Диагонали разрешены, путь строится автоматически.</span></div>
+      <div class="objective-row"><strong>2</strong><span>Откройте город Заря 🏛 и назначьте производство. Серые проекты показывают требуемую технологию.</span></div>
       <div class="objective-row"><strong>3</strong><span>На вкладке «Знания» выберите первое исследование.</span></div>
       <div class="objective-row"><strong>4</strong><span>Отведите поселенцев ⛺ минимум на четыре клетки от Зари и основайте город.</span></div>
       <div class="objective-row"><strong>5</strong><span>Работник 🔨 улучшает соседнюю контролируемую равнину, холмы или лес.</span></div>
-      <div class="objective-row"><strong>6</strong><span>Воин ⚔ и лучник 🏹 атакуют красные цели. Только ближний отряд захватывает города.</span></div>
+      <div class="objective-row"><strong>6</strong><span>Воин ⚔ и лучник 🏹 атакуют только после нажатия «Атаковать». Лучник использует квадратную дальность.</span></div>
     </div>
-    <p class="rule-note">Повторный клик по клетке, где стоят город и отряд, переключает между ними. Кнопка «Следующий» перебирает все ваши объекты.</p>
+    <p class="rule-note">Нажмите выбранный объект повторно, кнопку «Снять выбор», Esc или правую кнопку мыши. После этого клики по карте не расходуют движение.</p>
   `;
 }
 
@@ -364,7 +403,7 @@ function renderRoster(state) {
   const cities = state.cities.filter(city => city.owner === "player");
   const units = state.units.filter(unit => unit.owner === "player");
   const items = [
-    ...cities.map(city => ({ kind: "city", id: city.id, icon: "🏛", title: city.name, subtitle: `население ${city.population}`, color: CIVS.player.color })),
+    ...cities.map(city => ({ kind: "city", id: city.id, icon: "🏛", title: city.name, subtitle: `население ${city.population} · ${city.health}/${city.maxHealth} зд.`, color: CIVS.player.color })),
     ...units.map(unit => ({ kind: "unit", id: unit.id, icon: UNIT_ICONS[unit.type] || "◆", title: UNIT_TYPES[unit.type].name, subtitle: `${unit.movement}/${UNIT_TYPES[unit.type].movement} движ. · ${unit.health} зд.`, color: CIVS.player.color }))
   ];
   $("roster").innerHTML = items.map(item => `
@@ -396,7 +435,7 @@ function renderCoach(state) {
   $("coach").className = `coach ${complete === objectives.length ? "done" : ""}`;
   $("coach").innerHTML = `
     <div class="coach-head"><strong>${complete === objectives.length ? "Первые шаги завершены" : `Следующая цель: ${escapeHtml(next.label)}`}</strong><span>${complete}/${objectives.length}</span></div>
-    <small>${complete === objectives.length ? "Теперь развивайте города, создавайте войско и ищите соперников." : "Выполняйте цели в любом порядке. Игра сама отмечает прогресс."}</small>
+    <small>${complete === objectives.length ? "Теперь развивайте города, создавайте войско и следите за прогрессом соперников во вкладке «Мир»." : "Выполняйте цели в любом порядке. Игра сама отмечает прогресс."}</small>
     <div class="coach-progress"><i style="width:${complete / objectives.length * 100}%"></i></div>
   `;
   $("goal-badge").textContent = complete === objectives.length ? "Свободная игра" : `Первые шаги ${complete}/${objectives.length}`;
@@ -429,6 +468,7 @@ function bindPanel(state) {
       map.draw();
     }
   }));
+  document.querySelectorAll("[data-action=deselect]").forEach(button => button.addEventListener("click", clearSelection));
   document.querySelector("[data-action=next-city]")?.addEventListener("click", () => selectNext("city"));
   document.querySelectorAll("[data-mode]").forEach(button => button.addEventListener("click", () => {
     actionMode = actionMode === button.dataset.mode ? null : button.dataset.mode;
@@ -462,7 +502,27 @@ function showMessage(message) {
   clearTimeout(messageTimer);
   $("message").textContent = message;
   $("message").className = "visible";
-  messageTimer = setTimeout(() => { $("message").className = ""; }, 2600);
+  messageTimer = setTimeout(() => { $("message").className = ""; }, 4800);
+}
+
+function resultDetails(state) {
+  const reason = state.summary?.reason || `${CIVS[state.winner]?.name || "Победитель"} выполнил условие кампании.`;
+  const winnerCities = state.summary?.winnerCities ?? state.cities.filter(city => city.owner === state.winner).length;
+  const winnerTechs = state.summary?.winnerTechs ?? civ(state, state.winner)?.research.completed.length ?? 0;
+  const recent = state.log.slice(0, 4).map(entry => `<li>${escapeHtml(entry)}</li>`).join("");
+  return `
+    <p class="eyebrow">ИТОГ ЛЕТОПИСИ</p>
+    <h2>${state.status === "victory" ? "Победа" : "Поражение"}</h2>
+    <p class="lead">${escapeHtml(reason)}</p>
+    <p>Кампания завершена на ходу ${state.turn}. Победитель: ${escapeHtml(CIVS[state.winner]?.name || "неизвестен")}.</p>
+    <div class="objective-list">
+      <div class="objective-row"><strong>${state.summary.cities}</strong><span>ваших городов</span></div>
+      <div class="objective-row"><strong>${state.summary.techs}</strong><span>ваших открытых знаний</span></div>
+      <div class="objective-row"><strong>${winnerCities}/${VICTORY.cities}</strong><span>городов победителя</span></div>
+      <div class="objective-row"><strong>${winnerTechs}/${VICTORY.knowledge}</strong><span>знаний победителя</span></div>
+    </div>
+    <h3>Что произошло в конце</h3>
+    <ol>${recent}</ol>`;
 }
 
 function render(state, message = "") {
@@ -494,15 +554,7 @@ function render(state, message = "") {
 
   if (state.status !== "playing" && !resultShown) {
     resultShown = true;
-    $("result-body").innerHTML = `
-      <p class="eyebrow">ИТОГ ЛЕТОПИСИ</p>
-      <h2>${state.status === "victory" ? "Победа" : "Поражение"}</h2>
-      <p class="lead">Кампания завершена на ходу ${state.turn}. Победитель: ${escapeHtml(CIVS[state.winner]?.name || "неизвестен")}.</p>
-      <div class="objective-list">
-        <div class="objective-row"><strong>${state.summary.cities}</strong><span>ваших городов</span></div>
-        <div class="objective-row"><strong>${state.summary.techs}</strong><span>открытых знаний</span></div>
-        <div class="objective-row"><strong>${state.summary.battles}</strong><span>сражений в летописи</span></div>
-      </div>`;
+    $("result-body").innerHTML = resultDetails(state);
     $("result").showModal();
   }
   $("end-turn").disabled = state.status !== "playing";
@@ -529,6 +581,21 @@ $("next").addEventListener("click", () => selectNext());
 $("end-turn").addEventListener("click", () => issue("end"));
 $("save").addEventListener("click", () => controller.save());
 $("new-game").addEventListener("click", () => $("welcome").showModal());
+
+canvas.addEventListener("contextmenu", event => {
+  event.preventDefault();
+  clearSelection();
+});
+addEventListener("keydown", event => {
+  if (event.key !== "Escape") return;
+  if (actionMode) {
+    actionMode = null;
+    render(controller.state);
+    showMessage("Режим действия отменён.");
+  } else {
+    clearSelection();
+  }
+});
 
 const dialog = $("welcome");
 const loaded = controller.load();
