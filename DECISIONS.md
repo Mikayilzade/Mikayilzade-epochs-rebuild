@@ -64,18 +64,22 @@ A terminal smoke test may inspect state to choose deterministic orders, but it m
 
 Passing local release evidence does not silently start the next roadmap mission. `ROADMAP.tsv` and `NEXT_MISSION.md` continue to identify M1 while draft PR #7 is under review; M2 remains planned.
 
-## 2026-08-03 — Human experience is an independent acceptance class
+## 2026-08-03 — Human Product Gate overrides formal feature completion
 
-The real Chrome playtest of draft PR #7 overrules its automated release declaration. Green tests and a command-level terminal campaign prove simulation correctness, but not comprehension, discoverability or satisfying interaction. PR #7 is retained as an engineering source and is not accepted as Alpha 0.2.
+A real browser review rejected the alpha claim even though simulation tests and a terminal smoke passed. Human ability to identify objects, understand actions, manage a city and connect actions to consequences is now a blocking product criterion. Draft PR #7 was closed and superseded by an experience-recovery branch.
 
-## 2026-08-03 — Repair one experience slice before adding systems
+## 2026-08-03 — Functional visual language before final art
 
-The next mission preserves the technical backend and repairs the first ten minutes instead of adding diplomacy, content or later eras. Each core city/unit must expose identity, selection, understandable state, visible actions, blocked-action feedback, consequences and change over time.
+Browser-native vector silhouettes, terrain patterns, clear selection, health bars and contextual panels are sufficient for the current readability gate. Final illustration, animation, audio and commercial polish remain later work; functional art must still be distinguishable and usable now.
 
-## 2026-08-03 — Browser-native vector language before an art pipeline
+## 2026-08-03 — Inspection and orders are separate modes
 
-Use Canvas vector silhouettes, terrain patterns, faction color, labels and conventional pictograms to prove readability without introducing an external asset dependency. Final art remains later work, but letter-only tokens are no longer acceptable as the primary map language.
+Ordinary map clicks inspect terrain and entities without spending movement. A unit moves or attacks only after the player explicitly selects the corresponding action. Selection may be cleared through a visible button, repeated click, Escape or right click. This prevents accidental orders and makes the map safe to explore.
 
-## 2026-08-03 — Explicit wait/defend is a real unit action
+## 2026-08-03 — Eight-direction pathing and square ranged distance
 
-Player units receive a visible wait action. Combat-capable units fortify for the world phase, making the action mechanically meaningful rather than a cosmetic button; the next turn restores movement and clears fortification.
+Movement uses eight neighboring cells. Clicking a farther reachable destination runs deterministic pathfinding and spends the unit's current movement allowance, stopping partway when necessary. Ranged combat uses square/Chebyshev distance so an offset of two cells on one axis and one on the other counts as range two, matching the player's spatial expectation.
+
+## 2026-08-03 — Terminal outcomes must explain causality
+
+A result screen may not merely name the winner. It records the exact trigger, the winner's city and technology totals and the latest chronicle events. The world panel shows each civilization's progress toward the same four-city/eight-technology objective before the game ends.
