@@ -63,3 +63,19 @@ A terminal smoke test may inspect state to choose deterministic orders, but it m
 ## 2026-08-02 — M1 remains active until PR acceptance
 
 Passing local release evidence does not silently start the next roadmap mission. `ROADMAP.tsv` and `NEXT_MISSION.md` continue to identify M1 while draft PR #7 is under review; M2 remains planned.
+
+## 2026-08-03 — Human experience is an independent acceptance class
+
+The real Chrome playtest of draft PR #7 overrules its automated release declaration. Green tests and a command-level terminal campaign prove simulation correctness, but not comprehension, discoverability or satisfying interaction. PR #7 is retained as an engineering source and is not accepted as Alpha 0.2.
+
+## 2026-08-03 — Repair one experience slice before adding systems
+
+The next mission preserves the technical backend and repairs the first ten minutes instead of adding diplomacy, content or later eras. Each core city/unit must expose identity, selection, understandable state, visible actions, blocked-action feedback, consequences and change over time.
+
+## 2026-08-03 — Browser-native vector language before an art pipeline
+
+Use Canvas vector silhouettes, terrain patterns, faction color, labels and conventional pictograms to prove readability without introducing an external asset dependency. Final art remains later work, but letter-only tokens are no longer acceptable as the primary map language.
+
+## 2026-08-03 — Explicit wait/defend is a real unit action
+
+Player units receive a visible wait action. Combat-capable units fortify for the world phase, making the action mechanically meaningful rather than a cosmetic button; the next turn restores movement and clears fortification.
