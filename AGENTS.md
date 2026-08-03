@@ -1,45 +1,46 @@
 # Epohi Rebuild Agent Contract
 
-Read this file first, then:
+Read first:
 
 1. `PROGRAM.md`
-2. `AUTONOMOUS_CAMPAIGN.md`
-3. `VISION.md`
-4. `SOURCE_AUDIT.md`
-5. `STATE.md`
-6. `ROADMAP.tsv`
-7. `NEXT_MISSION.md`
-8. `RELEASE_GATES.md`
-9. `QUALITY.md`
-10. `ARCHITECTURE.md`
-11. `DECISIONS.md`
-12. `PLAYTEST.md`
-13. `reference/LEGACY_SOURCE_EVIDENCE.md`
+2. `VISION.md`
+3. `SOURCE_AUDIT.md`
+4. `STATE.md`
+5. `MISSION.md`
+6. `NEXT_MISSION.md`
+7. `QUALITY.md`
+8. `PLAYTEST.md`
+9. `ARCHITECTURE.md`
+10. `DECISIONS.md`
+11. `reference/LEGACY_SOURCE_EVIDENCE.md`
+
+Also apply Creative Studio 0.4 and `docs/HUMAN_PRODUCT_GATE.md` from `Mikayilzade/creative-studio` when accessible.
 
 ## Product identity
 
-1. This is a source-dependent rebuild of the existing game `Mikayilzade/Epohi`, not a greenfield game.
-2. The local `reference/` bundle is an identity-defining source prepared from verified legacy files and repository history. Inspect it before design or implementation.
-3. Preserve product identity: a turn-based civilization strategy on a generated tile map with exploration, units, settlements, economy, AI actors, conflict and era progression.
-4. Never replace the map strategy with event cards, a linear narrative choice game, an idle game, or a menu-only prototype.
-5. A new architecture and new implementation are authorized. Silent changes to genre, core loop, player agency, spatial model or long-term direction are not.
+1. This is a source-dependent rebuild of `Mikayilzade/Epohi`.
+2. Preserve turn-based civilization strategy on a generated tile map with exploration, persistent units/cities, economy, autonomous actors, conflict and era progression.
+3. Never replace the spatial strategy with event cards, linear narrative, idle/menu-only play or a cosmetic map.
 
-## Autonomous production
+## Current mission authority
 
-6. The program target is a complete civilization-scale 4X game. The active mission is the first non-complete roadmap milestone and is defined in `NEXT_MISSION.md`.
-7. Work in large coherent release missions. Do not reduce the mission to one visual fix or the easiest subset of requirements.
-8. Complete internal design, production, testing, playtest and bounded repair without returning to the user between ordinary stages.
-9. Decide reversible technical, visual, balancing, content and workflow details independently. Record material decisions in `DECISIONS.md`.
-10. Ask only for a true blocker: missing protected access, spending, irreversible action or an identity conflict unsupported by the local source bundle.
-11. Keep likely feedback areas data-driven and replaceable: terrain, units, buildings, resources, balance, AI policies, progression, visuals and content.
-12. Use at most four bounded preproduction passes and at most two full verification-and-repair cycles per release mission.
-13. Within one mission, allow at most one fundamental rollback to a reliable semantic checkpoint. Do not loop indefinitely.
+4. The active mission is M1R: first-ten-minute human experience recovery.
+5. Preserve useful PR #7 engineering work. Do not expand into diplomacy, later eras or additional content counts.
+6. Make reversible visual, interaction, layout and wording decisions independently.
+7. Do not ask ordinary questions or return after internal stages.
+8. Use at most two complete verification-and-repair cycles.
+9. Do not trigger GitHub Actions.
 
-## Delivery and evidence
+## Human Product Gate
 
-14. A feature counts only when simulation, access/UI, persistence where relevant, tests and playtest coverage exist. Labels and promises are not implementation.
-15. Run checks locally. Do not trigger GitHub Actions unless the active mission explicitly permits it.
-16. Update `STATE.md`, `SOURCE_AUDIT.md`, `DECISIONS.md`, `PLAYTEST.md`, `ROADMAP.tsv` and `NEXT_MISSION.md` before finalizing.
-17. Deliver one coherent runnable release in one draft pull request. Keep repairing the same PR within bounded limits; do not open a PR per finding.
-18. No routine progress spam. Return with the draft PR, evidence, known limitations and release-gate status.
-19. Stop when the active release gate passes or bounded repair is exhausted and the architectural limitation is documented.
+10. A class, configuration entry, test fixture, log line or bot-completed campaign does not prove a human-facing feature.
+11. Every core entity needs identity, selection, understandable state, visible actions, blocked-action feedback, consequences and change over time.
+12. A real build human test is mandatory before `playable slice`, `alpha` or `release` may be claimed.
+13. Without a real passing human test, report exactly: `technical prototype — human gate pending`.
+14. A failed human gate must be answered by repairing one coherent experience slice, not by adding more global systems.
+
+## Delivery
+
+15. Update `STATE.md`, `MISSION.md`, `NEXT_MISSION.md`, `QUALITY.md`, `DECISIONS.md` and `PLAYTEST.md`.
+16. Deliver one coherent draft PR from `agent/first-ten-minutes`.
+17. Preserve honest limitations and stop when the gate passes or bounded repair is exhausted.
