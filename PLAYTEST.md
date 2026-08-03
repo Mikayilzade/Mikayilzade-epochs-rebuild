@@ -7,76 +7,94 @@
 - Human reviewer: repository owner/player.
 - Result: **FAIL**.
 
-## Observed failure
+## First observed failure
 
 - Units appeared as unexplained letter markers and lacked immediate identity.
-- The player found almost no discoverable actions beyond horizontal/adjacent movement.
+- Unit roles and actions were not discoverable.
 - Cities did not appear openable or meaningfully manageable.
 - The interface contained data and instructions but did not create a clear action → consequence loop.
 - The result felt like a constrained technical demo rather than a small 4X game.
 
 Automated tests and a command-level terminal campaign had passed, proving simulation consistency but not human usability.
 
-## Repair build under test
+## Repair build — second human playtest
 
-- Branch: `agent/first-ten-minutes`.
-- Honest maturity before re-test: `technical prototype — human gate pending`.
+- Branch: `agent/first-ten-minutes` through GitHub Pages `preview`.
+- Environment: real desktop Chrome, 2026-08-03.
+- Human reviewer: repository owner/player.
+- Result: **meaningful improvement, gate still pending**.
 
-## First-ten-minute test
+### What improved
 
-Run from a clean/new campaign without reading README.
+- City production and technology dependencies became understandable.
+- Locked production choices were correctly recognized as technology-gated rather than missing.
+- Research progression and dependencies were enjoyable.
+- Archers created a visibly useful tactical role.
+- The campaign reached a real terminal result.
+- Overall progress was judged substantially better than the letter-token build.
 
-- [ ] Within 30 seconds, identify capital, scout, settler and warrior.
-- [ ] Select the scout and understand movement, role and available actions.
-- [ ] Move the scout and see newly revealed terrain.
-- [ ] Select/open the capital from map and from the owned-object roster.
-- [ ] Understand population, growth, yields, defence, buildings and queue.
-- [ ] Choose production after comparing cost, turns and effect.
-- [ ] Choose research and understand prerequisite/progress/unlock.
-- [ ] Understand where and how settlers found a second city.
-- [ ] Understand worker improvement and military attack before using them.
-- [ ] End a turn and identify at least one visible consequence.
-- [ ] Save and continue the same state.
+### Remaining Human Product Gate blockers found
 
-## Core entity interaction contracts
+- Movement allowed only four cardinal directions; diagonal movement was expected.
+- A unit could move only one tile per click even when it had several movement points; the player expected automatic pathing to a farther reachable tile.
+- Clicking a tile while a unit was selected could spend movement accidentally; inspection and orders were not safely separated.
+- There was no obvious way to clear selection.
+- Archer range used Manhattan distance, so an offset target two rows and one column away incorrectly appeared out of range.
+- Enemy city health and armour were not visible enough.
+- The defeat screen named the winner but did not explain the exact triggering condition. A city recapture and rival objective completion happened in the same turn, so causality was unclear.
 
-### City
+## Interaction repair implemented after second playtest
 
-- [ ] Recognizable identity.
-- [ ] Reliable selection.
-- [ ] Understandable state.
-- [ ] Multiple visible decisions.
-- [ ] Blocked choices explain why.
-- [ ] Production progress and completion are visible.
+- Eight-direction movement.
+- Automatic pathfinding to a farther tile, consuming available movement points and stopping partway when needed.
+- Explicit action modes: ordinary tile clicks inspect only; movement occurs only after choosing `Идти`.
+- Selection can be cleared through a button, repeated object click, `Escape` or right click.
+- Archer and attack range now use square/Chebyshev distance, so an offset of two by one counts as range two.
+- City health bar, HP and armour are visible on the map and in inspection/combat messages.
+- Locked production cards name the required technology.
+- World progress shows every civilization against the same city/knowledge objective.
+- Terminal screen records the exact reason, winner progress and final chronicle events.
+- Starvation now trims worked tiles immediately, preventing an invalid save after population loss.
 
-### Units
+## Engineering evidence for the interaction repair
 
-- [ ] Scout, settler, warrior, worker and ranged unit have distinct visual language.
-- [ ] Role, health, movement and combat values are visible.
-- [ ] Role actions are visible.
-- [ ] Legal targets are highlighted.
-- [ ] Invalid actions return useful feedback.
+Local mirror reconstructed from branch files on 2026-08-03:
 
-## Visual evidence to capture
+- JavaScript syntax checks: pass for world, simulation, controller, persistence, main UI and map modules.
+- `node --test`: **24/24 passed**.
+- Command-level campaign smoke: player victory on turn **47**, including exploration, cities, queues, production, improvements, rivals, battle, capture/loss and save/reload evidence.
+- Production build script: pass; static `dist/` created.
+- GitHub Actions were not run.
 
-- [ ] opening state;
-- [ ] scout selected;
-- [ ] capital selected/open;
-- [ ] production choice;
-- [ ] research progress;
-- [ ] narrow/mobile state if supported.
+## Re-test checklist
 
-## Independent product review
+Run from the permanent GitHub Pages preview after deployment and hard refresh.
 
-Reviewer must begin from the build, not the implementation report.
+- [ ] Diagonal movement works.
+- [ ] Clicking a farther reachable tile makes the unit follow an automatic route up to its available movement.
+- [ ] Normal tile inspection never spends movement unless `Идти`, `Атаковать` or `Улучшить землю` is active.
+- [ ] Selection can be cleared using the visible button, repeated click, Escape and right click.
+- [ ] An archer can attack an enemy offset by two cells on one axis and one on the other.
+- [ ] Enemy cities show health and armour before an attack.
+- [ ] The world panel makes rival victory progress understandable.
+- [ ] A terminal result states the exact reason for victory or defeat.
 
-- Next action understandable without repository instructions: pass / fail / pending
-- City feels manageable rather than decorative: pass / fail / pending
-- Units feel like roles rather than tokens: pass / fail / pending
-- First ten minutes create an understandable decision loop: pass / fail / pending
+## First-ten-minute product checklist
+
+- [x] Within 30 seconds, identify capital, scout, settler and warrior.
+- [x] Open the capital and compare production choices.
+- [x] Understand research dependencies and unlocks.
+- [x] Recognize a useful ranged-combat role.
+- [ ] Move and inspect the map without accidental orders.
+- [ ] Understand a rival's victory before the terminal screen appears.
+- [ ] Confirm the revised result screen explains the final causal event.
+
+## Graphics scope
+
+Current vector/browser-native graphics are functional readability assets, not final art. Final character art, animation, effects, sound and broader visual polish remain later production work. The Human Product Gate still requires current symbols to be distinguishable and usable; it does not require final commercial art at this stage.
 
 ## Human Product Gate
 
-Status: **pending re-test**.
+Status: **pending focused re-test**.
 
-The build must not be called alpha or release until this section records a real pass.
+The build must not be called alpha or release until the remaining interaction and outcome-clarity checks pass in a real browser.
