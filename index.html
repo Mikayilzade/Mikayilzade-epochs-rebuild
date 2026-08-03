@@ -1,1 +1,105 @@
-<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101b24"><title>Эпохи — Ancient World 0.2</title><link rel="stylesheet" href="/src/ui/styles.css"></head><body><header><div><p class="eyebrow">ЭПОХИ · ANCIENT WORLD 0.2</p><h1>Летопись древнего мира</h1></div><div id="turn-badge"></div></header><main><section class="map-shell"><canvas id="map" tabindex="0" aria-label="Карта: выберите отряд или город"></canvas><div class="map-tools"><button id="zoom-in" aria-label="Приблизить">＋</button><button id="zoom-out" aria-label="Отдалить">−</button><button id="fit">Вся карта</button><button id="next">Следующий объект</button></div><div id="tile-tip" aria-live="polite"></div><div id="message" role="status"></div></section><aside><section id="resources" class="resources"></section><section class="panel"><div class="tabs"><button data-tab="object">Объект</button><button data-tab="research">Знания</button><button data-tab="world">Мир</button><button data-tab="help" aria-label="Справка">?</button></div><div id="panel"></div></section><section class="panel chronicle"><h3>Летопись</h3><ol id="log"></ol></section><div class="actions"><button id="save">Сохранить</button><button id="new-game">Новый мир</button><button id="end-turn" class="primary">Завершить ход</button></div></aside></main><dialog id="welcome"><form method="dialog"><p class="eyebrow">НОВАЯ ЛЕТОПИСЬ</p><h2>Создайте древний мир</h2><p>Исследуйте, стройте города, управляйте производством и победите, создав 4 города и открыв 8 знаний. Потеря всех городов означает поражение.</p><label>Семя <input id="seed" value="ancient-02" maxlength="40"></label><button id="create" class="primary">Начать</button><button id="continue">Продолжить</button></form></dialog><dialog id="result"><div id="result-body"></div><button onclick="this.closest('dialog').close()">К карте</button></dialog><script type="module" src="/src/main.js"></script></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#111c19">
+  <title>Эпохи — Рассвет племени</title>
+  <link rel="stylesheet" href="/src/ui/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">ЭПОХИ · EXPERIENCE SLICE</p>
+      <h1>Рассвет племени</h1>
+    </div>
+    <div class="topbar-status">
+      <span id="goal-badge">Первые шаги</span>
+      <strong id="turn-badge"></strong>
+    </div>
+  </header>
+
+  <main>
+    <section class="map-shell" aria-label="Игровая карта">
+      <canvas id="map" tabindex="0" aria-label="Карта мира. Выберите город, отряд или соседнюю клетку"></canvas>
+
+      <div class="map-tools" aria-label="Управление картой">
+        <button id="zoom-in" title="Приблизить карту">＋</button>
+        <button id="zoom-out" title="Отдалить карту">−</button>
+        <button id="fit">Вся карта</button>
+        <button id="focus">К выбранному</button>
+      </div>
+
+      <section id="coach" class="coach" aria-live="polite"></section>
+      <div id="tile-tip" aria-live="polite"></div>
+      <div id="message" role="status"></div>
+    </section>
+
+    <aside>
+      <section id="resources" class="resources" aria-label="Доход державы"></section>
+
+      <section class="panel roster-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">ВАША ДЕРЖАВА</p>
+            <h2>Объекты</h2>
+          </div>
+          <button id="next" class="ghost">Следующий</button>
+        </div>
+        <div id="roster" class="roster"></div>
+      </section>
+
+      <section class="panel primary-panel">
+        <div class="tabs" role="tablist">
+          <button data-tab="object" role="tab">Выбор</button>
+          <button data-tab="research" role="tab">Знания</button>
+          <button data-tab="world" role="tab">Мир</button>
+          <button data-tab="help" role="tab">Как играть</button>
+        </div>
+        <div id="panel"></div>
+      </section>
+
+      <section class="panel chronicle">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">ПОСЛЕДНИЕ СОБЫТИЯ</p>
+            <h2>Летопись</h2>
+          </div>
+        </div>
+        <ol id="log"></ol>
+      </section>
+
+      <div class="actions">
+        <button id="save">Сохранить</button>
+        <button id="new-game">Новый мир</button>
+        <button id="end-turn" class="primary">Завершить ход</button>
+      </div>
+    </aside>
+  </main>
+
+  <dialog id="welcome">
+    <form method="dialog">
+      <p class="eyebrow">НОВАЯ ЛЕТОПИСЬ</p>
+      <h2>Проведите племя к первым городам</h2>
+      <p class="lead">Разведайте землю, выберите развитие столицы, откройте знание и заложите второй город. Все важные действия доступны прямо на карте и в панели выбранного объекта.</p>
+      <div class="welcome-steps">
+        <span><b>1</b> Разведайте</span>
+        <span><b>2</b> Развивайте</span>
+        <span><b>3</b> Расширяйтесь</span>
+      </div>
+      <label>Семя мира
+        <input id="seed" value="dawn-experience" maxlength="40" autocomplete="off">
+      </label>
+      <button id="create" class="primary">Начать новую летопись</button>
+      <button id="continue">Продолжить сохранённую</button>
+    </form>
+  </dialog>
+
+  <dialog id="result">
+    <div id="result-body"></div>
+    <button onclick="this.closest('dialog').close()">Вернуться к карте</button>
+  </dialog>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
