@@ -4,43 +4,63 @@ This repository is rebuilding the existing map strategy `Mikayilzade/Epohi` into
 
 ## Играть локально
 
-Нужен Node.js 20 или новее. Зависимости устанавливать не требуется.
+Нужен Node.js 20 или новее. Установка внешних зависимостей не требуется.
+
+В PowerShell используйте:
+
+```powershell
+npm.cmd run dev
+```
+
+В обычном терминале:
 
 ```bash
 npm run dev
 ```
 
-Откройте `http://127.0.0.1:4173`. Для production-сборки и её проверки:
+Откройте `http://127.0.0.1:4173`.
+
+Production-сборка и её просмотр:
 
 ```bash
 npm run build
 npm run preview
 ```
 
-Статические файлы появятся в `dist/`. Проверки: `npm test` и `npm run smoke`.
+Статические файлы появятся в `dist/`. Инженерные проверки: `npm test` и `npm run smoke`.
 
 ## Current status
 
-Release `0.2 Ancient World Alpha` is a complete short 4X campaign: generated map and fog, independently managed cities and production queues, territory and improvements, six unit roles, deterministic combat/capture, two rival civilizations, independent raiders, eight technologies, victory/defeat and validated saves.
+Honest maturity: **technical prototype — human gate pending**.
 
-The active program now develops the product through large autonomous release missions toward a complete 4X campaign.
+The repository contains a substantial ancient-world engineering foundation: generated map and fog, persistent cities and units, production queues, territory, improvements, research, deterministic combat/capture, two rivals, independent raiders, victory/defeat and validated saves.
+
+A real desktop playtest showed that the previous interface did not make those systems understandable or satisfying. Draft PR #7 is therefore not accepted as an alpha.
+
+The active branch `agent/first-ten-minutes` repairs one coherent experience slice:
+
+- readable vector map symbols rather than letter-only tokens;
+- an owned city/unit roster;
+- explicit unit actions and feedback;
+- a real city-management panel;
+- production cost, progress, turns and effects;
+- research prerequisites and progress;
+- a dynamic first-steps objective tracker;
+- terrain patterns, resource detail and richer hover feedback.
+
+The build may be promoted to a playable slice only after a real human first-ten-minute test passes.
 
 ## Production program
 
 - `PROGRAM.md` — final product target and pillars.
-- `AUTONOMOUS_CAMPAIGN.md` — how agents continue without micro-task supervision.
+- `MISSION.md` — current finite outcome.
+- `NEXT_MISSION.md` — active experience-repair mission.
+- `QUALITY.md` — engineering and Human Product Gate criteria.
+- `PLAYTEST.md` — real human test record.
 - `ROADMAP.tsv` — release sequence from 0.1 to 1.0.
-- `NEXT_MISSION.md` — the full active release mission.
-- `RELEASE_GATES.md` — evidence required to call each release complete.
-
-The current active milestone remains `M1 / 0.2 Ancient World Alpha` while draft PR #7 completes release acceptance. M2 remains planned and is not part of this repair.
-
-## Read order for agents
-
-Start with `AGENTS.md`; it contains the authoritative read order and production contract.
 
 ## Identity in one sentence
 
 A turn-based civilization strategy on a generated tile map with exploration, persistent cities and units, economy, conflict, era progression, saves and an independently acting world.
 
-GitHub Actions remain disabled unless the active mission explicitly permits them. Run checks locally and return one coherent draft PR per release mission.
+GitHub Actions remain disabled unless an active mission explicitly permits them.
