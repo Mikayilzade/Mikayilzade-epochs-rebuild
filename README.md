@@ -2,65 +2,56 @@
 
 This repository is rebuilding the existing map strategy `Mikayilzade/Epohi` into a complete standalone civilization-scale 4X game.
 
+## Играть в браузере
+
+Постоянная тестовая версия публикуется через GitHub Pages:
+
+`https://mikayilzade.github.io/Mikayilzade-epochs-rebuild/`
+
+После обновления ветки `preview` может понадобиться 1–3 минуты и жёсткая перезагрузка `Ctrl + F5`.
+
 ## Играть локально
 
-Нужен Node.js 20 или новее. Установка внешних зависимостей не требуется.
-
-В PowerShell используйте:
-
-```powershell
-npm.cmd run dev
-```
-
-В обычном терминале:
+Нужен Node.js 20 или новее. Зависимости устанавливать не требуется.
 
 ```bash
 npm run dev
 ```
 
-Откройте `http://127.0.0.1:4173`.
-
-Production-сборка и её просмотр:
+Откройте `http://127.0.0.1:4173`. Для production-сборки и её проверки:
 
 ```bash
 npm run build
 npm run preview
 ```
 
-Статические файлы появятся в `dist/`. Инженерные проверки: `npm test` и `npm run smoke`.
+Статические файлы появятся в `dist/`. Проверки: `npm test` и `npm run smoke`.
 
 ## Current status
 
-Honest maturity: **technical prototype — human gate pending**.
+The repository contains a substantial Ancient World engineering foundation: generated map and fog, cities and production queues, territory and improvements, unit roles, deterministic combat/capture, rival civilizations, technologies, victory/defeat and validated saves.
 
-The repository contains a substantial ancient-world engineering foundation: generated map and fog, persistent cities and units, production queues, territory, improvements, research, deterministic combat/capture, two rivals, independent raiders, victory/defeat and validated saves.
+The current honest maturity is:
 
-A real desktop playtest showed that the previous interface did not make those systems understandable or satisfying. Draft PR #7 is therefore not accepted as an alpha.
+`technical prototype — focused Human Product Gate re-test pending`
 
-The active branch `agent/first-ten-minutes` repairs one coherent experience slice:
-
-- readable vector map symbols rather than letter-only tokens;
-- an owned city/unit roster;
-- explicit unit actions and feedback;
-- a real city-management panel;
-- production cost, progress, turns and effects;
-- research prerequisites and progress;
-- a dynamic first-steps objective tracker;
-- terrain patterns, resource detail and richer hover feedback.
-
-The build may be promoted to a playable slice only after a real human first-ten-minute test passes.
+Draft PR #8 repairs the first-ten-minute experience, including readable objects, city management, explicit actions, safe inspection, eight-direction pathfinding, understandable ranged combat and causal terminal results. It must pass a real human browser re-test before merge or an alpha claim.
 
 ## Production program
 
 - `PROGRAM.md` — final product target and pillars.
-- `MISSION.md` — current finite outcome.
-- `NEXT_MISSION.md` — active experience-repair mission.
-- `QUALITY.md` — engineering and Human Product Gate criteria.
-- `PLAYTEST.md` — real human test record.
+- `AUTONOMOUS_CAMPAIGN.md` — how agents continue without micro-task supervision.
 - `ROADMAP.tsv` — release sequence from 0.1 to 1.0.
+- `NEXT_MISSION.md` — the active Human Product Gate recovery mission.
+- `RELEASE_GATES.md` — evidence required to call each release complete.
+- `PLAYTEST.md` — actual human findings and the focused re-test checklist.
+
+## Read order for agents
+
+Start with `AGENTS.md`; it contains the authoritative read order and production contract.
 
 ## Identity in one sentence
 
 A turn-based civilization strategy on a generated tile map with exploration, persistent cities and units, economy, conflict, era progression, saves and an independently acting world.
 
-GitHub Actions remain disabled unless an active mission explicitly permits them.
+GitHub Actions remain disabled unless the active mission explicitly permits them. Run checks locally and return one coherent draft PR per release mission.
