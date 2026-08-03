@@ -1,61 +1,51 @@
-# Quality Gate
+# Quality Gate — Human Experience Recovery
 
-A mission is ready only when the promised map-strategy experience is usable, not merely described.
+The mission passes only when the technical rules are accessible through a coherent human interaction experience.
 
-## Product identity
+## Identity and map
 
-- [ ] The map is the primary interaction surface.
-- [ ] Player agency is expressed through units, settlements, geography, economy, and turns.
-- [ ] Events, tutorials, or text panels support the simulation but do not replace it.
-- [ ] The result is recognizably the rebuild described by `VISION.md` and `SOURCE_AUDIT.md`.
+- [ ] Generated map remains the primary interaction surface.
+- [ ] Capital, units, terrain, resources, improvements and territory are recognizable.
+- [ ] Visual identity does not depend on unexplained Latin letters.
+- [ ] Selection, legal movement, attacks and improvements are visibly distinct.
 
-## Core loop
+## Core entity contracts
 
-- [ ] New game creates a valid, playable state.
-- [ ] Unit selection and movement work with clear legal/illegal feedback.
-- [ ] Exploration reveals fog correctly.
-- [ ] Settlement and economy state visibly change across turns.
-- [ ] Research/progression has a real effect.
-- [ ] At least one AI-controlled actor advances independently.
-- [ ] End turn cannot double-run or leave the UI in a broken intermediate state.
-- [ ] A player can complete at least ten turns without a blocker or console error.
+- [ ] Any owned city can be selected from map and roster.
+- [ ] City state, queue, choices, costs, turns and effects are understandable.
+- [ ] Scout role and exploration consequence are understandable.
+- [ ] Settler founding rules and blocked-site feedback are understandable.
+- [ ] Worker improvements and valid tiles are understandable.
+- [ ] Military movement, waiting/defence and attack risk are understandable.
 
-## Persistence
+## First-ten-minute experience
 
-- [ ] Save data has an explicit schema version.
-- [ ] Save and reload preserve map, units, settlement, economy, progression, turn, and AI state.
-- [ ] Invalid or missing saves fail safely.
-- [ ] A new game can be started after an old save exists.
+- [ ] New player can identify the goal and next useful action without README.
+- [ ] Dynamic guidance supports play without replacing direct interaction.
+- [ ] Player can move, open city, choose production, choose research and end turn.
+- [ ] At least one visible consequence is understood after ending a turn.
+- [ ] No critical action requires developer tools or hidden knowledge.
 
-## Architecture
+## Engineering preservation
 
-- [ ] Domain rules do not depend directly on DOM elements.
-- [ ] Content and balance values are stored in data/configuration rather than scattered through rendering code.
-- [ ] Rendering, input, persistence, simulation, and content have clear boundaries.
-- [ ] Seeded or injectable randomness is available where tests require reproducibility.
-- [ ] Future unit attributes and autonomous policies can be added without replacing movement, world, or save systems.
-
-## Interface
-
-- [ ] Map controls work with mouse and touch-capable layouts.
-- [ ] Essential information is readable without horizontal page scrolling.
-- [ ] Selected unit, current turn, major resources, settlement, and available actions are understandable.
-- [ ] Zoom or camera state cannot permanently lose the map.
-- [ ] Buttons have accessible labels and disabled states where relevant.
-
-## Verification
-
-- [ ] Unit tests cover movement legality, fog reveal, economy turn resolution, progression, AI turn, and persistence serialization/migration.
-- [ ] One smoke scenario covers new game → move → explore → settle/use city → end turns → save → reload.
-- [ ] Production build completes.
-- [ ] Local server or preview was opened successfully.
+- [ ] Existing domain and persistence tests pass.
+- [ ] New wait/defend controller action is tested.
+- [ ] Save/load preserves the repaired experience state.
+- [ ] Build and local launch succeed.
 - [ ] No release-blocking console errors or missing assets.
-- [ ] `git diff --check` or equivalent passes.
 
-## Delivery
+## Human Product Gate
 
-- [ ] README contains exact beginner-friendly launch steps.
-- [ ] `PLAYTEST.md` records the tested path and findings.
-- [ ] `STATE.md` distinguishes implemented, tested, and planned work.
-- [ ] Known limitations are honest and specific.
-- [ ] One draft PR contains the integrated result.
+- [ ] Real desktop browser build tested.
+- [ ] `PLAYTEST.md` contains first-ten-minute evidence and findings.
+- [ ] Opening, unit, city and production/research states are captured.
+- [ ] Independent reviewer starts from the build, not the PR report.
+- [ ] Gate result is explicitly pass/fail/pending.
+- [ ] Automated or scripted completion is not presented as human acceptance.
+
+## Maturity declaration
+
+- Human Product Gate: pass / fail / pending
+- Honest maturity: technical prototype / playable slice / alpha
+- Release blockers:
+- Accepted limitations:
