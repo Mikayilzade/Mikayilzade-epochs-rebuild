@@ -1,16 +1,16 @@
 import { CIVS, TERRAIN, UNIT_TYPES } from "../content/config.js";
-import { canMove, distance, indexOf } from "../domain/world.js";
+import { indexOf, rangeDistance, reachableTiles } from "../domain/world.js";
 
 export const TILE = 56;
 
-function roundedRect(ctx, x, y, w, h, r) {
-  const radius = Math.min(r, w / 2, h / 2);
+function roundedRect(ctx, x, y, width, height, radius) {
+  const safeRadius = Math.min(radius, width / 2, height / 2);
   ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.arcTo(x + w, y, x + w, y + h, radius);
-  ctx.arcTo(x + w, y + h, x, y + h, radius);
-  ctx.arcTo(x, y + h, x, y, radius);
-  ctx.arcTo(x, y, x + w, y, radius);
+  ctx.moveTo(x + safeRadius, y);
+  ctx.arcTo(x + width, y, x + width, y + height, safeRadius);
+  ctx.arcTo(x + width, y + height, x, y + height, safeRadius);
+  ctx.arcTo(x, y + height, x, y, safeRadius);
+  ctx.arcTo(x, y, x + width, y, safeRadius);
   ctx.closePath();
 }
 
@@ -103,10 +103,10 @@ function drawImprovement(ctx, improvement, x, y) {
   ctx.fillStyle = "#fff3c4";
   ctx.lineWidth = 2;
   if (improvement === "farm") {
-    for (let i = -5; i <= 5; i += 5) {
+    for (let offset = -5; offset <= 5; offset += 5) {
       ctx.beginPath();
-      ctx.moveTo(i, 5);
-      ctx.lineTo(i, -5);
+      ctx.moveTo(offset, 5);
+      ctx.lineTo(offset, -5);
       ctx.stroke();
     }
     ctx.beginPath();
@@ -132,9 +132,9 @@ function drawImprovement(ctx, improvement, x, y) {
   ctx.restore();
 }
 
-function drawUnitIcon(ctx, type, cx, cy, scale = 1) {
+function drawUnitIcon(ctx, type, centerX, centerY, scale = 1) {
   ctx.save();
-  ctx.translate(cx, cy);
+  ctx.translate(centerX, centerY);
   ctx.scale(scale, scale);
   ctx.strokeStyle = "#15221d";
   ctx.fillStyle = "#15221d";
@@ -245,6 +245,30 @@ function drawCityIcon(ctx, city, x, y) {
   ctx.restore();
 }
 
+function drawCityStatus(ctx, city, x, y, scale) {
+  ctx.fillStyle = "rgba(48,19,19,.9)";
+  roundedRect(ctx, x + 8, y + 3, 40, 5, 3);
+  ctx.fill();
+  ctx.fillStyle = city.health / city.maxHealth > .45 ? "#75bd84" : "#d66e61";
+  roundedRect(ctx, x + 8, y + 3, 40 * Math.max(0, city.health) / city.maxHealth, 5, 3);
+  ctx.fill();
+
+  if (scale <= .72) return;
+  const first = `${city.name} · ${city.population}`;
+  const second = `HP ${city.health}/${city.maxHealth} · BR ${city.defence}`;
+  ctx.font = "bold 10px sans-serif";
+  const width = Math.max(ctx.measureText(first).width, ctx.measureText(second).width) + 12;
+  ctx.fillStyle = "rgba(10,20,17,.9)";
+  roundedRect(ctx, x + TILE / 2 - width / 2, y - 28, width, 27, 5);
+  ctx.fill();
+  ctx.fillStyle = "#f3e7c8";
+  ctx.textAlign = "center";
+  ctx.fillText(first, x + TILE / 2, y - 16);
+  ctx.font = "9px sans-serif";
+  ctx.fillStyle = "#cbd7cf";
+  ctx.fillText(second, x + TILE / 2, y - 5);
+}
+
 export class MapView {
   constructor(canvas, camera, click, hover = () => {}) {
     this.canvas = canvas;
@@ -283,7 +307,8 @@ export class MapView {
           x: (points[0].x + points[1].x) / 2,
           y: (points[0].y + points[1].y) / 2
         };
-        const separation = Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
+        const separation = Math.hypot(points[0].x - points[1].x,
+          points[0].y - points[1].y);
         camera.scale = Math.max(.35, Math.min(2.5,
           this.gesture.scale * separation / this.gesture.separation));
         const ratio = camera.scale / this.gesture.scale;
@@ -344,26 +369,34 @@ export class MapView {
   }
 
   drawActionOverlay(ctx, selected) {
-    if (!selected || selected.owner !== "player" || selected.movement < 1) return;
+    if (!selected || selected.owner !== "player" || selected.movement < 1 || !this.mode) return;
     const definition = UNIT_TYPES[selected.type];
+
+    if (this.mode === "move") {
+      for (const tile of reachableTiles(this.state, selected)) {
+        const mapTile = this.state.map.tiles[indexOf(tile.x, tile.y, this.state.map.width)];
+        if (!mapTile.revealed) continue;
+        ctx.fillStyle = "#78b68b60";
+        roundedRect(ctx, tile.x * TILE + 4, tile.y * TILE + 4, TILE - 8, TILE - 8, 8);
+        ctx.fill();
+      }
+      return;
+    }
+
     for (const tile of this.state.map.tiles) {
       if (!tile.revealed) continue;
-      const enemy = this.state.units.find(unit => unit.owner !== "player" &&
-        unit.x === tile.x && unit.y === tile.y) ||
-        this.state.cities.find(city => city.owner !== "player" &&
-          city.x === tile.x && city.y === tile.y);
       let color = null;
-      if (enemy && definition.strength > 1 && distance(selected, enemy) <= definition.range) {
-        color = this.mode === "attack" || !this.mode ? "#d95f526e" : null;
-      } else if (distance(selected, tile) === 1) {
-        const legal = canMove(this.state, selected, tile).ok;
-        if (this.mode === "improve") {
-          const improvement = tile.owner === "player" && !tile.improvement &&
-            ["plains", "hills", "forest"].includes(tile.terrain);
-          color = improvement ? "#e8bd6860" : "#87918d22";
-        } else if (this.mode !== "attack") {
-          color = legal ? "#78b68b55" : "#9ca7a322";
-        }
+      if (this.mode === "attack") {
+        const enemy = this.state.units.find(unit => unit.owner !== "player" &&
+          unit.x === tile.x && unit.y === tile.y) ||
+          this.state.cities.find(city => city.owner !== "player" &&
+            city.x === tile.x && city.y === tile.y);
+        if (enemy && definition.strength > 1 &&
+            rangeDistance(selected, enemy) <= definition.range) color = "#d95f527d";
+      } else if (this.mode === "improve" && rangeDistance(selected, tile) === 1) {
+        const improvement = tile.owner === "player" && !tile.improvement &&
+          ["plains", "hills", "forest"].includes(tile.terrain);
+        color = improvement ? "#e8bd6875" : "#87918d22";
       }
       if (color) {
         ctx.fillStyle = color;
@@ -405,46 +438,36 @@ export class MapView {
       const x = city.x * TILE;
       const y = city.y * TILE;
       drawCityIcon(ctx, city, x, y);
+      drawCityStatus(ctx, city, x, y, this.camera.scale);
       if (city.id === this.state.selected?.id) {
         ctx.strokeStyle = "#fff4c5";
         ctx.lineWidth = 3;
         roundedRect(ctx, x + 3, y + 3, TILE - 6, TILE - 6, 10);
         ctx.stroke();
       }
-      if (this.camera.scale > .72) {
-        const label = `${city.name} · ${city.population}`;
-        ctx.font = "bold 10px sans-serif";
-        const width = ctx.measureText(label).width + 10;
-        ctx.fillStyle = "rgba(10,20,17,.88)";
-        roundedRect(ctx, x + TILE / 2 - width / 2, y - 13, width, 15, 5);
-        ctx.fill();
-        ctx.fillStyle = "#f3e7c8";
-        ctx.textAlign = "center";
-        ctx.fillText(label, x + TILE / 2, y - 2);
-      }
     }
 
     for (const unit of this.state.units) {
       const tile = this.state.map.tiles[indexOf(unit.x, unit.y, this.state.map.width)];
       if (!tile.revealed) continue;
-      const cx = (unit.x + .5) * TILE;
-      const cy = (unit.y + .5) * TILE;
+      const centerX = (unit.x + .5) * TILE;
+      const centerY = (unit.y + .5) * TILE;
       ctx.beginPath();
-      ctx.arc(cx, cy, 17, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, 17, 0, Math.PI * 2);
       ctx.fillStyle = CIVS[unit.owner].color;
       ctx.fill();
       ctx.strokeStyle = unit.id === this.state.selected?.id ? "#fff4c5" : "#1a2823";
       ctx.lineWidth = unit.id === this.state.selected?.id ? 4 : 2;
       ctx.stroke();
-      drawUnitIcon(ctx, unit.type, cx, cy, .82);
+      drawUnitIcon(ctx, unit.type, centerX, centerY, .82);
 
-      const max = UNIT_TYPES[unit.type].maxHealth;
+      const maximum = UNIT_TYPES[unit.type].maxHealth;
       ctx.fillStyle = "#3b1717";
       roundedRect(ctx, unit.x * TILE + 8, unit.y * TILE + 46, 40, 5, 3);
       ctx.fill();
-      ctx.fillStyle = unit.health / max > .45 ? "#75bd84" : "#d66e61";
+      ctx.fillStyle = unit.health / maximum > .45 ? "#75bd84" : "#d66e61";
       roundedRect(ctx, unit.x * TILE + 8, unit.y * TILE + 46,
-        40 * Math.max(0, unit.health) / max, 5, 3);
+        40 * Math.max(0, unit.health) / maximum, 5, 3);
       ctx.fill();
     }
 
