@@ -1,84 +1,66 @@
-# Current Mission — First Playable Map Strategy
+# Current Mission — Human Product Gate Recovery
 
-Status: ready for production
+Status: **implementation complete; focused real-browser re-test pending**
 
 ## Outcome
 
-Create from scratch a coherent, locally runnable first rebuild of `Эпохи` that proves the real product identity through a complete turn-based map-strategy loop.
+Preserve the substantial Ancient World simulation foundation while making the first ten minutes understandable, safe and causally readable for a human player.
 
-A player must be able to start a new campaign, explore a generated map with units, establish or operate a settlement, gain and spend meaningful resources, research initial progress, encounter at least one independent world threat or rival actor, end turns, save, reload, and continue.
+This mission is not a content-expansion pass. It repairs the interaction contract between the player and the existing map, units, cities, research, combat and victory systems.
 
-## Required identity sources
+## Required interaction experience
 
-| Source | Role | Status |
-|---|---|---|
-| `VISION.md` | Canonical rebuild direction | available, identity-defining |
-| `SOURCE_AUDIT.md` | Verified identity and provenance | available, identity-defining |
-| `reference/LEGACY_SOURCE_EVIDENCE.md` | Local evidence extracted from the legacy repository | available, identity-defining |
-| `reference/legacy-snapshot/` | Exact representative legacy source files | available, identity-defining |
-| `https://github.com/Mikayilzade/Epohi` | Full legacy provenance and optional deeper reference | use when accessible; local bundle is sufficient for identity |
-| `https://github.com/Mikayilzade/creative-studio` | Production rules | read when accessible; local control files remain binding |
+- The player can inspect a normal map tile without spending movement.
+- Movement, attack and improvement happen only after an explicit action choice.
+- Selected objects can be deselected through a visible control, repeated click, Escape or right click.
+- Units move in eight directions.
+- Clicking a farther reachable tile builds a path automatically and spends only available movement points.
+- Legal destinations and targets are highlighted only while the corresponding mode is active.
+- Invalid orders explain why and preserve state.
 
-The Source Dependency Gate passes only after the agent opens the local identity sources and records the inspected files in `SOURCE_AUDIT.md`.
+## Required combat experience
 
-## In scope
+- Ranged attacks use square/Chebyshev distance on the square grid.
+- An offset target two cells on one axis and one on the other is range two.
+- Enemy unit and city inspection exposes owner, health and relevant combat values.
+- Enemy cities display health and armour before an attack.
+- Attack confirmation shows expected damage and retaliation.
 
-- Generated tile map with at least three terrain types and meaningful passability/yields.
-- Fog of war and exploration.
-- Camera suitable for desktop and mobile: pan, zoom, and a reliable way to show or refocus the map.
-- Persistent player units with selection, movement points, and at least two distinct roles.
-- At least one settlement with population or development state.
-- Economy with a minimum of food, production, and knowledge/science; gold may be included when it serves the loop.
-- One small research/progression path that visibly changes available actions or status.
-- A turn pipeline in which economy and non-player actors advance after the player ends the turn.
-- At least one independent threat or rival actor that moves or changes state without direct player control.
-- Campaign save/load with a versioned schema and graceful handling of absent or invalid data.
-- Responsive, understandable interface.
-- Automated tests for pure core rules and one reproducible smoke path for a full short session.
-- Exact local launch and production-build instructions.
+## Required city and progression experience
 
-## Out of scope for this mission
+- Any owned city can be selected from map or roster.
+- City panel explains growth, yields, health, armour, buildings and queue.
+- Locked production choices name the technology that unlocks them.
+- Research dependencies and concrete unlocks remain visible.
 
-- Recreating every legacy feature or balance value.
-- Full diplomacy, religion, governments, trade networks, or victory variety.
-- Final graphics, audio, localization, accounts, cloud saves, multiplayer, or monetization.
-- Large historical content libraries.
-- Complex unit training and full intelligence algorithms; architecture must leave room for them.
-- A long campaign spanning all planned eras.
+## Required terminal experience
 
-## Mandatory acceptance criteria
+- The world panel explains that every civilization uses the same four-city/eight-technology victory condition.
+- Rival progress is visible before the result.
+- Victory or defeat states the exact trigger.
+- Result panel shows winner city/technology totals and the final chronicle events.
 
-- [ ] The main play screen is a tile map, not a list of event cards.
-- [ ] A fresh campaign can be started without editing files or using developer tools.
-- [ ] The player can select and move a unit across passable tiles while movement rules prevent invalid movement.
-- [ ] Unseen map areas begin hidden and can be revealed through exploration.
-- [ ] The player can found or use a settlement and observe resource production after ending a turn.
-- [ ] Research or progression produces at least one visible gameplay unlock or era/status change.
-- [ ] At least one non-player actor performs a meaningful autonomous turn action.
-- [ ] Saving, closing/reloading, and continuing preserves the campaign state.
-- [ ] The interface is usable at common desktop and phone viewport sizes.
-- [ ] Game rules are separated from rendering and content data sufficiently to change balance and presentation without rewriting the engine.
-- [ ] Local tests pass, a production build is created, and launch instructions are verified.
-- [ ] `STATE.md`, `SOURCE_AUDIT.md`, `DECISIONS.md`, and `PLAYTEST.md` are updated.
-- [ ] One draft PR contains the coherent result and honest limitations.
+## Graphics scope
 
-## Autonomous authority
+Current browser-native vector symbols are functional readability assets. They need to distinguish roles and state, but final character art, animation, effects and audio are later roadmap work.
 
-The agent may independently choose technology, directory structure, visual direction, algorithms, initial balance, content names, tests, and implementation order. Prefer a browser game that can run locally and be statically deployed, unless verified repository constraints justify another choice.
+## Automated acceptance evidence
 
-All such choices must preserve the product identity and remain change-friendly.
+- 24 focused tests pass in the reconstructed local branch mirror.
+- Command-level campaign smoke reaches a real player victory on turn 47 with all evidence.
+- JavaScript syntax checks pass for changed modules.
+- Production build completes.
+- GitHub Actions are not run.
 
-## Hard constraints
+## Human acceptance
 
-- Do not ask routine questions.
-- Do not create a narrative card game as a substitute for the map strategy.
-- Do not copy the legacy monolith merely to claim a rebuild; use a clean modular architecture.
-- Do not enable or trigger GitHub Actions.
-- Use at most two complete verification-and-repair cycles.
-- Do not expand scope after the acceptance criteria are met.
+The permanent GitHub Pages preview must be re-tested for:
 
-## Delivery
+1. diagonal movement;
+2. farther-tile automatic routing;
+3. safe inspection and deselection;
+4. expected archer offset range;
+5. enemy city HP/armour visibility;
+6. exact and understandable defeat/victory cause.
 
-- Working branch: `codex/first-map-strategy-rebuild` or equivalent.
-- Result: one draft pull request into `main`.
-- Final report: inspected source files, runnable result, launch steps, checks, major decisions, limitations, and best next player action.
+Do not merge PR #8, begin M2 or claim Alpha 0.2 until the focused Human Product Gate re-test passes and `PLAYTEST.md` records it.

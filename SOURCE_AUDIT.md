@@ -131,3 +131,13 @@ Turn-based civilization strategy on a generated tile map, designed for browser p
 ## Agent completion requirement
 
 Before implementation, append the local files actually opened. In the final report, name those files and explain how the delivered loop preserves this audit.
+
+## M1 source-dependent implementation audit — 2026-08-02
+
+The M1 mission opened in full the required program documents (`AGENTS.md`, `PROGRAM.md`, `AUTONOMOUS_CAMPAIGN.md`, `VISION.md`, this audit, `STATE.md`, `ROADMAP.tsv`, `NEXT_MISSION.md`, `RELEASE_GATES.md`, `QUALITY.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `PLAYTEST.md`), `reference/LEGACY_SOURCE_EVIDENCE.md`, and every file in `reference/legacy-snapshot/`. It also inspected the complete 0.1 source, tests, scripts, HTML, package metadata and README before production.
+
+Ancient World 0.2 extends, rather than substitutes, the verified legacy loop: generated tiles and per-civilization knowledge drive exploration; persistent named cities work controlled terrain and production queues; role-based units move and fight spatially; two rival civilizations and independents process world turns; technologies cause concrete unlocks/status change; and schema-2 saves preserve a finishable campaign. The local evidence bundle remains sufficient and no unsupported genre or identity change was made.
+
+## M1 release-audit repair mapping — 2026-08-02
+
+The audit repair preserves the same source-dependent mapping while replacing synthetic evidence with play-surface commands. The deterministic turn-49 campaign selects and moves persistent units, founds cities at legal map positions, works controlled terrain, completes queues and research, resolves autonomous rival/independent turns, fights and captures spatial targets, and resumes the same versioned campaign twice. Territory exclusivity, civilization knowledge and full campaign persistence are now validated rather than merely assumed. M1 remains the active roadmap row until draft PR #7 is accepted; no M2 system was introduced.

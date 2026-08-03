@@ -1,54 +1,69 @@
 # Verified Current State
 
-Updated: 2026-08-02
+Updated: 2026-08-03 — **second human playtest completed; focused interaction repair implemented; Human Product Gate pending re-test**
 
-## Implemented and locally verified
+## Engineering foundation preserved
 
-- A new dependency-free browser implementation presents a seeded, generated 16 × 12 tile world as the primary surface.
-- Plains, forests, hills, water and mountains have data-defined yields/passability; some land carries visible resources.
-- Per-tile fog is revealed by persistent scouts and settlers. Orthogonal movement spends role-specific movement points and rejects range, impassable terrain, exhausted movement and every occupied destination tile, preventing inaccessible unit stacks.
-- The First Hearth settlement has population/development and works local terrain for food, production and knowledge. A settler may found a distant second settlement.
-- Agriculture and masonry form a prerequisite research path with visible unlock messages, tribe → settlement → city status, and production-funded Ambar/Quarry construction whose yields affect later turns.
-- End turn resolves yields, population development, research, autonomous deterministic raider movement and consequential raids, movement refresh and fog.
-- Version 1 JSON saves validate the complete map shape, terrain, resources, entity bounds, identifiers, research prerequisites/progress and building unlock relationships before restoration; missing, malformed and unsupported saves fail safely.
-- Canvas camera supports mouse/touch pan, two-finger pinch and wheel/buttons zoom, whole-map fit and selected-unit refocus. The panels reflow for phone widths.
-- Twelve pure-rule automated tests and the deterministic turn-13 save/reload smoke scenario pass; the smoke path rejects friendly stacking, researches Agriculture, spends production on an Ambar, restores it, and observes a raid. Chronicle entries are rendered as text rather than restored HTML. Production output is generated in `dist/`.
+- Deterministic generated 20 × 14 map with terrain, resources, fog, territory and improvements.
+- Persistent player, two rivals and independent actors.
+- Cities with population, growth, health/defence, worked territory, buildings and multi-turn production.
+- Scout, settler, warrior, archer, worker and spearman definitions.
+- Research, combat, capture, victory/defeat and schema-2 persistence.
+- Command-level terminal campaign evidence.
 
-## Verified legacy state
+## Human Product Gate history
 
-The original repository is `https://github.com/Mikayilzade/Epohi`.
+### Draft PR #7
 
-Verified legacy sources show:
+Result: **FAIL**.
 
-- generated maps with sizes 20, 28, and 36 tiles per side;
-- terrain, features, improvements, buildings, units, technologies, rivals, and barbarians;
-- fog/reveal state on individual tiles;
-- player and rival cities and units;
-- tile-based economy with food, production, gold, and science;
-- civilization progression from tribe toward settlement, city, kingdom, and empire;
-- persistent campaigns, multiple save slots, autosaves, camera persistence, and save-schema migration;
-- map camera with pan, pinch, fit-to-map, focus, and deep tile zoom;
-- generated persistent unit names and navigation through multiple units on one tile;
-- barbarian camps that spawn, are discovered independently, create units, and can return after destruction.
+The first real Chrome playtest found unexplained letter tokens, weakly discoverable actions, decorative-feeling cities and no clear action → consequence loop.
 
-Exact evidence and source references are in `SOURCE_AUDIT.md` and `reference/LEGACY_SOURCE_EVIDENCE.md`.
+### Draft PR #8 — first experience-repair test
 
-## Tested boundaries
+Result: **meaningful improvement, not yet a pass**.
 
-- Content/configuration: `src/content/`.
-- Deterministic world, movement, fog, economy, progression and AI simulation: `src/domain/`.
-- Commands and persistence: `src/app/`.
-- Canvas/input/camera/panels: `src/ui/` and `src/main.js`.
+The player reported:
 
-## Known limitations
+- city production and science dependencies were understandable and enjoyable;
+- archers felt useful;
+- the campaign reached a real terminal result;
+- movement and inspection remained unsafe or too restricted;
+- defeat causality and enemy city combat state were unclear.
 
-- This finite first slice has one hostile actor and no tactical combat resolution; the raider creates map pressure through autonomous movement and production-stealing raids near the capital.
-- Settlements automatically work nearby tiles and buildings complete immediately when purchased; citizens and multi-turn production queues remain future work.
-- Saves use one local browser slot rather than the legacy multi-slot IndexedDB campaign system.
-- The map size is fixed at 16 × 12 for this slice, though its contents are genuinely seed-generated.
-- Final art, audio, diplomacy and a long multi-era campaign are outside the mission.
-- Automated browser capture was unavailable in the production environment, so a real desktop and narrow-viewport visual pass is still required before merge.
+## Focused interaction repair now implemented
 
-## Best next player action
+- eight-direction movement;
+- automatic pathfinding to farther reachable tiles;
+- partial route movement when a destination exceeds current movement points;
+- explicit action modes so ordinary map clicks inspect rather than issue orders;
+- visible deselection plus repeated-click, Escape and right-click cancellation;
+- square/Chebyshev ranged combat, matching the player's expected two-by-one archer range;
+- map-level enemy city health bars and HP/armour labels;
+- detailed enemy unit/city inspection messages;
+- required technology named on locked production projects;
+- visible progress of all civilizations toward the shared victory objective;
+- terminal summaries with exact cause, winner city/technology totals and final events;
+- worked-tile trimming after starvation to keep save state valid.
 
-Run the PR branch locally, verify the desktop layout and core interactions, then inspect camera controls at a narrow viewport. After the visual pass, merge PR #4 if no blocker is found.
+## Engineering verification
+
+Local mirror reconstructed from the actual branch files on 2026-08-03:
+
+- JavaScript syntax checks: pass for main UI, map, controller, world, simulation and persistence modules;
+- `node --test`: **24/24 passed**;
+- command-level campaign smoke: player victory on turn **47** with all required evidence;
+- production build: pass; static `dist/` created;
+- GitHub Actions were not run.
+
+## Graphics maturity
+
+Current browser-native vector assets are functional readability art. Final character art, animation, effects, audio and commercial visual polish are intentionally later work, but symbols must remain distinguishable enough to pass the current Human Product Gate.
+
+## Current maturity
+
+`technical prototype — focused human re-test pending`
+
+## Current action
+
+Publish the latest `agent/first-ten-minutes` head to the permanent `preview` branch, then re-test diagonal/path movement, safe inspection, deselection, archer range, enemy city status and exact terminal reasoning. Do not merge or claim alpha until the Human Product Gate records a pass.
