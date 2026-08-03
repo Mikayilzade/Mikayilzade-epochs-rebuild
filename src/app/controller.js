@@ -8,6 +8,7 @@ import {
   improveTile
 } from "../domain/simulation.js";
 import { loadGame, saveGame } from "./persistence.js";
+import { UNIT_TYPES } from "../content/config.js";
 
 export class Controller {
   constructor(render = () => {}, storage = globalThis.localStorage) {
@@ -49,6 +50,20 @@ export class Controller {
     return { ok: true };
   }
 
+  waitUnit(id) {
+    const unit = this.state.units.find(item => item.id === id);
+    if (!unit || unit.owner !== "player") {
+      return { ok: false, reason: "Выберите свой отряд." };
+    }
+    if (unit.movement < 1) {
+      return { ok: false, reason: "Отряд уже завершил действия." };
+    }
+    unit.movement = 0;
+    unit.fortified = UNIT_TYPES[unit.type].strength > 1;
+    this.state.log.unshift(`${UNIT_TYPES[unit.type].name} завершает действия${unit.fortified ? " и готовится к обороне" : ""}.`);
+    return { ok: true };
+  }
+
   command(type, payload = {}) {
     let result = { ok: false, reason: "Неизвестная команда." };
     const selectedId = this.state.selected?.id;
@@ -60,6 +75,7 @@ export class Controller {
     if (type === "produce") {
       result = chooseProduction(this.state, payload.cityId, payload.kind, payload.id);
     }
+    if (type === "wait") result = this.waitUnit(selectedId);
     if (type === "end") result = endTurn(this.state);
     this.render(this.state, result.ok ? "" : result.reason);
     return result;
